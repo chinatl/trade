@@ -1,47 +1,46 @@
 <template>
-<div class="section" v-loading='loading'>
-	<div id="app-sider" class="trading-slider">
-		<div class="trading-filter">
-			<div class="search"><i class="trading-icon trading-icon-search"></i> <input placeholder="搜索" type="text"></div>
-			<div class="drop">
-				<p>价格显示:<span>USD</span></p>
-				<ul class="drop-box">
-					<li class="active">USD</li>
-					<li class="">CNY</li>
-				</ul>
-			</div>
-		</div>
-		<div class="trading-market">
-			<div class="trading-tab">
-				<ul>
-					<!---->
-					<li role="button" :class=" current == index ? 'active' : ''" v-for='(item,index) in father_market'>
-						<img :src="item.markUrl">
-						<p>{{item.vName}}</p>
-					</li>
-				</ul>
-			</div>
-			<div class="market-list">
-				<div class=""></div>
-					<el-table 
-				:data="son_market" 
-			 	fit highlight-current-row
-			 	class='market'
-			   :default-sort = "{prop: 'newprice', order: 'descending'}"
-				style="width: 100%;margin-top:20px">
-					<el-table-column align="center" label="市场" prop='market' sortable>
-						<template slot-scope="scope" >
-						<span>{{scope.row.market}}</span>
+    <div class="section" v-loading='loading'>
+    <div id="app-sider" class="trading-slider">
+<!--
+        <div class="trading-filter">
+            <div class="search"><i class="trading-icon trading-icon-search"></i> <input placeholder="搜索" type="text"></div>
+            <div class="drop">
+                <p>价格显示:<span>USD</span></p>
+                <ul class="drop-box">
+                    <li class="active">USD</li>
+                    <li class="">CNY</li>
+                </ul>
+            </div>
+        </div>
+-->
+        <div class="trading-market">
+            <div class="trading-tab">
+                <ul>
+                    <!---->
+                    <li role="button" :class=" father_current == index ? 'active' : ''" v-for='(item,index) in father_market' @click='check_father(item,index)'>
+                        <img :src="item.markUrl">
+                        <p>{{item.vName}}</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="market-list">
+                <div class=""></div>
+                <el-table :data="son_market" fit highlight-current-row
+                v-loading='loading'
+                class='market' :default-sort="{prop: 'newprice', order: 'descending'}" style="width: 100%;margin-top:20px" @row-click='check_son'>
+                    <el-table-column align="center" :label="$t(`ranking['市场']`)" prop='market'>
+                        <template slot-scope="scope">
+						<span>{{scope.row.vName}}</span>
 						</template>
 </el-table-column>
-<el-table-column align="center" label="最新价" sortable prop='newprice'>
-	<template slot-scope="scope">
-						<span>{{scope.row.newprice}}</span>
-						</template>
+<el-table-column align="center" :label="$t(`ranking['最新价']`)" sortable prop='newprice'>
+    <template slot-scope="scope">
+                                <span>{{scope.row.latestPrize}}</span>
+                        </template>
 </el-table-column>
-<el-table-column align="center" label="涨跌幅" sortable>
-	<template slot-scope="scope">
-						<span>{{scope.row.num}}</span>
+<el-table-column align="center" :label="$t(`ranking['涨跌幅']`)" sortable>
+    <template slot-scope="scope">
+						<span>{{scope.row.roseFall}}</span>
 						</template>
 </el-table-column>
 </el-table>
@@ -49,1116 +48,1107 @@
 </div>
 </div>
 <div id="app-trade-pro" class="trading-content">
-	<div class="trading-count">
-		<div class="l-area">
-			<div class="current-price">
-				<div class="coin-icon"><img src="/src/images/icon/market-icon/market-qtum.png"></div>
-				<h2>QTUM/BTC <span class="text-second trading-greencolor">0.001927</span></h2>
-				<p>≈ 15.309 USD</p>
-			</div>
-			<div class="num">24H涨跌幅<br><span class="text-second trading-greencolor">-8.62%</span></div>
-			<div class="num">24H最高价<br><span aria-label="折合:16.977 USD" class="trading-redcolor hint--bottom">0.002137</span></div>
-			<div class="num">24H最低价<br><span aria-label="折合:15.309 USD" class="trading-greencolor hint--bottom">0.001927</span></div>
-			<div class="num">24H交易量<br><span class="trading-darkcolor">38344.99 QTUM</span></div>
-		</div>
-		<div class="r-area"><a role="button" onclick="$('.trading-chart').toggle()" style="margin-right: 15px;">收起/展开K线</a></div>
-	</div>
-	<div class="trading-chart">
-		<!---->
-		<div class="chart-area">
-			<div class="common-box chart-box">
-				<div class="chart-box-head">
-					<div class="l-area">
-						<div class="item">
-							<p :class="current ? 'active' : ''" @click='current = true'>K线图</p>
-						</div>
-						<div class="item">
-							<p :class="!current ? 'active' : ''" @click='current = false'>深度图</p>
-						</div>
-						<div class="line"></div>
-						<div class="item">
-							<p aria-label="K线价格显示单位设置" class="hint--bottom">BTC</p>
-						</div>
-						<div class="item">
-							<p aria-label="K线价格显示单位设置" class="hint--bottom active">USD</p>
-						</div>
-					</div>
-					<div class="r-area">
-						<div class="item arrow">
-							<p>价格显示：<span>USD</span></p>
-							<ul class="item-list">
-								<li role="button">默认</li>
-								<li role="button" class="active">USD</li>
-								<li role="button">CNY</li>
-							</ul>
-						</div>
-					</div>
-				</div>
-				<div class="chart-box-body" v-show='!current'>
-					<chart :options="polar" :style='{width:width+"px"}'></chart>
-				</div>
-				<div class="chart-box-body" id="chart-box-body" v-show='current'>
-					<!---->
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="trading-hotspot">
-		<div class="trading-form">
-			<div class="form-tab">
-				<ul>
-					<li class="active">限价委托</li>
-					<li class="">批量委托</li>
-					<!---->
-				</ul>
-				<div class="operation"><a role="button" class="switch">价格输入转换<i></i></a>
-					<!---->
-				</div>
-			</div>
-			<div class="form-lever-panel">
-				<!---->
-				<!---->
-			</div>
-			<div class="form-content">
-				<div class="box trading-buy">
-					<h2>买入QTUM</h2>
-					<p class="form-assets">
-						可用BTC：<span aria-label="可买：-- QTUM" class="trading-redcolor hint--top">--</span>
-						<!---->
-						<!---->
-					</p>
-					<!---->
-					<!---->
-					<!---->
-					<div class="form-group">
-						<div class="form-control"><input type="text" class="buyColor"> <label>买入价BTC</label>
-							<!----><span>≈<b class="sellColor">14.981</b> USD</span></div>
-					</div>
-					<!---->
-					<div class="form-group active">
-						<div class="form-control"><input type="text" class="sellColor"> <label>买入量QTUM</label></div>
-						<div class="bk-trans-form">
-							<div id="rangeSlider_1" class="range range_buy"><span class="sliderPercent">0.00%</span>
-								<div class="range_wrap" data-ratio="0" tabindex="0">
-									<div class="range_paths_wrap">
-										<div class="range_path"></div>
-									</div>
-									<div class="range_track_wrap">
-										<div class="range_track" style="width: 0%;"></div>
-										<div class="range_handle" style="left: 0%;"></div>
-									</div>
-									<div class="range_points_wrap">
-										<div class="range_point active" data-point-ratio="0" style="left: 0%;"></div>
-										<div class="range_point" data-point-ratio="20" style="left: 20%;"></div>
-										<div class="range_point" data-point-ratio="40" style="left: 40%;"></div>
-										<div class="range_point" data-point-ratio="60" style="left: 60%;"></div>
-										<div class="range_point" data-point-ratio="80" style="left: 80%;"></div>
-										<div class="range_point" data-point-ratio="100" style="left: 100%;"></div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<p class="form-assets">预计交易额：<span class="trading-redcolor hint--top-left" aria-label="折合:17287.410 USD">2.17602515</span> BTC</p>
-					<!---->
-					<div class="form-button"><button type="button" role="button" class="trading-redbg disabled">登录/注册</button></div>
-				</div>
-				<div class="box trading-sell">
-					<h2>卖出QTUM</h2>
-					<p class="form-assets">
-						可用QTUM：<span aria-label="可卖：-- BTC" class="trading-greencolor hint--top">--</span>
-						<!---->
-						<!---->
-					</p>
-					<!---->
-					<div class="form-group">
-						<div class="form-control"><input type="text" class="sellColor"> <label>卖出价BTC</label>
-							<!----><span>≈<b class="sellColor">14.981</b> USD</span></div>
-					</div>
-					<!---->
-					<!---->
-					<!---->
-					<div class="form-group">
-						<div class="form-control"><input type="text" class="sellColor"> <label>卖出量QTUM</label></div>
-						<div class="bk-trans-form">
-							<div id="rangeSlider_0" class="range range_sell"><span class="sliderPercent">0.00%</span>
-								<div class="range_wrap" data-ratio="0" tabindex="0">
-									<div class="range_paths_wrap">
-										<div class="range_path"></div>
-									</div>
-									<div class="range_track_wrap">
-										<div class="range_track"></div>
-										<div class="range_handle"></div>
-									</div>
-									<div class="range_points_wrap">
-										<div class="range_point" data-point-ratio="0" style="left: 0%;"></div>
-										<div class="range_point" data-point-ratio="20" style="left: 20%;"></div>
-										<div class="range_point" data-point-ratio="40" style="left: 40%;"></div>
-										<div class="range_point" data-point-ratio="60" style="left: 60%;"></div>
-										<div class="range_point" data-point-ratio="80" style="left: 80%;"></div>
-										<div class="range_point" data-point-ratio="100" style="left: 100%;"></div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<p class="form-assets">预计交易额：<span class="trading-greencolor hint--top-left" aria-label="折合:17287.410 USD">2.17602515</span> BTC</p>
-					<!---->
-					<div class="form-button"><button type="button" role="button" class="trading-greenbg disabled">登录/注册</button></div>
-				</div>
-			</div>
-		</div>
-		<div class="trading-disc" assist-price="[object Object]">
-			<div class="disc-head">
-				<p class="stall"><span>档位</span></p>
-				<p><span>价格(BTC)</span></p>
-				<p><span>折价(USD)</span></p>
-				<p class="last"><span>数量(QTUM)</span></p>
-			</div>
-			<div class="disc-list">
-				<div id="asksDish" class="sell-disc disc-inner" style="touch-action: none;">
-					<ul style="transition-timing-function: cubic-bezier(0.1, 0.57, 0.1, 1); transition-duration: 500ms; <!--transform: translate(0px, -952px) translateZ(0px);-->">
-						<li role="button">
-							<p class="stall trading-greencolor">卖9</p>
-							<p class="trading-greencolor">0.001981</p>
-							<p>15.738</p>
-							<p class="last">10.25</p>
-							<p class="progress" style="width: 0.92%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-greencolor">卖8</p>
-							<p class="trading-greencolor">0.001975</p>
-							<p>15.690</p>
-							<p class="last">1.96</p>
-							<p class="progress" style="width: 0.17%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-greencolor">卖7</p>
-							<p class="trading-greencolor">0.001971</p>
-							<p>15.658</p>
-							<p class="last">1.70</p>
-							<p class="progress" style="width: 0.15%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-greencolor">卖6</p>
-							<p class="trading-greencolor">0.001966</p>
-							<p>15.618</p>
-							<p class="last">12.20</p>
-							<p class="progress" style="width: 1.09%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-greencolor">卖5</p>
-							<p class="trading-greencolor">0.001950</p>
-							<p>15.491</p>
-							<p class="last">1.82</p>
-							<p class="progress" style="width: 0.16%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-greencolor">卖4</p>
-							<p class="trading-greencolor">0.001949</p>
-							<p>15.483</p>
-							<p class="last">0.51</p>
-							<p class="progress" style="width: 0.04%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-greencolor">卖3</p>
-							<p class="trading-greencolor">0.001947</p>
-							<p>15.467</p>
-							<p class="last">1112.99</p>
-							<p class="progress" style="width: 100%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-greencolor">卖2</p>
-							<p class="trading-greencolor">0.001945</p>
-							<p>15.452</p>
-							<p class="last">9.90</p>
-							<p class="progress" style="width: 0.88%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-greencolor">卖1</p>
-							<p class="trading-greencolor">0.001929</p>
-							<p>15.324</p>
-							<p class="last">150.69</p>
-							<p class="progress" style="width: 13.53%;"></p>
-						</li>
-					</ul>
-					<div class="iScrollVerticalScrollbar iScrollLoneScrollbar" style="overflow: hidden; pointer-events: none;">
-						<div class="iScrollIndicator" style="transition-duration: 500ms; display: block; height: 19px; transform: translate(0px, 125px) translateZ(0px); transition-timing-function: cubic-bezier(0.1, 0.57, 0.1, 1);"></div>
-					</div>
-				</div>
-			</div>
-			<div class="disc-line"></div>
-			<div class="disc-price">
-				<div class="price">
-					<h3><span class="text-second trading-greencolor">0.001927 <b style="font-size: 12px; vertical-align: middle;">BTC</b></span></h3>
-					≈ 15.309 USD
-				</div>
-				<div class="control">
-					<a role="button"><img src="/src/images/icon/show_bids.jpg"></a>
-					<a role="button"><img src="/src/images/icon/show_asks.jpg"></a>
-				</div>
-			</div>
-			<div class="disc-line"></div>
-			<div class="disc-list">
-				<div id="bidsDish" class="buy-disc disc-inner" style="touch-action: none;">
-					<ul style="transition-timing-function: cubic-bezier(0.1, 0.57, 0.1, 1); transition-duration: 0ms; transform: translate(0px, 0px) translateZ(0px);">
-						<li role="button">
-							<p class="stall trading-redcolor">买1</p>
-							<p class="trading-redcolor">0.001900</p>
-							<p>15.094</p>
-							<p class="last">30.00</p>
-							<p class="progress" style="width: 0.8%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买2</p>
-							<p class="trading-redcolor">0.001899</p>
-							<p>15.086</p>
-							<p class="last">2.80</p>
-							<p class="progress" style="width: 0.07%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买3</p>
-							<p class="trading-redcolor">0.001898</p>
-							<p>15.078</p>
-							<p class="last">9.30</p>
-							<p class="progress" style="width: 0.24%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买4</p>
-							<p class="trading-redcolor">0.001893</p>
-							<p>15.038</p>
-							<p class="last">0.14</p>
-							<p class="progress" style="width: 0%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买5</p>
-							<p class="trading-redcolor">0.001886</p>
-							<p>14.983</p>
-							<p class="last">8.70</p>
-							<p class="progress" style="width: 0.23%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买6</p>
-							<p class="trading-redcolor">0.001884</p>
-							<p>14.967</p>
-							<p class="last">10.30</p>
-							<p class="progress" style="width: 0.27%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买7</p>
-							<p class="trading-redcolor">0.001868</p>
-							<p>14.840</p>
-							<p class="last">1112.99</p>
-							<p class="progress" style="width: 29.83%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买8</p>
-							<p class="trading-redcolor">0.001867</p>
-							<p>14.832</p>
-							<p class="last">14.00</p>
-							<p class="progress" style="width: 0.37%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买9</p>
-							<p class="trading-redcolor">0.001866</p>
-							<p>14.824</p>
-							<p class="last">10.80</p>
-							<p class="progress" style="width: 0.28%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买10</p>
-							<p class="trading-redcolor">0.001865</p>
-							<p>14.816</p>
-							<p class="last">14.40</p>
-							<p class="progress" style="width: 0.38%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买11</p>
-							<p class="trading-redcolor">0.001863</p>
-							<p>14.800</p>
-							<p class="last">1.32</p>
-							<p class="progress" style="width: 0.03%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买12</p>
-							<p class="trading-redcolor">0.001861</p>
-							<p>14.784</p>
-							<p class="last">2.06</p>
-							<p class="progress" style="width: 0.05%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买13</p>
-							<p class="trading-redcolor">0.001859</p>
-							<p>14.768</p>
-							<p class="last">1112.99</p>
-							<p class="progress" style="width: 29.83%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买14</p>
-							<p class="trading-redcolor">0.001845</p>
-							<p>14.657</p>
-							<p class="last">12.50</p>
-							<p class="progress" style="width: 0.33%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买15</p>
-							<p class="trading-redcolor">0.001842</p>
-							<p>14.633</p>
-							<p class="last">13.80</p>
-							<p class="progress" style="width: 0.36%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买16</p>
-							<p class="trading-redcolor">0.001837</p>
-							<p>14.594</p>
-							<p class="last">11.30</p>
-							<p class="progress" style="width: 0.3%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买17</p>
-							<p class="trading-redcolor">0.001834</p>
-							<p>14.570</p>
-							<p class="last">8.40</p>
-							<p class="progress" style="width: 0.22%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买18</p>
-							<p class="trading-redcolor">0.001823</p>
-							<p>14.482</p>
-							<p class="last">6.00</p>
-							<p class="progress" style="width: 0.16%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买19</p>
-							<p class="trading-redcolor">0.001806</p>
-							<p>14.347</p>
-							<p class="last">13.50</p>
-							<p class="progress" style="width: 0.36%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买20</p>
-							<p class="trading-redcolor">0.001724</p>
-							<p>13.696</p>
-							<p class="last">13.10</p>
-							<p class="progress" style="width: 0.35%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买21</p>
-							<p class="trading-redcolor">0.001707</p>
-							<p>13.561</p>
-							<p class="last">6.00</p>
-							<p class="progress" style="width: 0.16%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买22</p>
-							<p class="trading-redcolor">0.001653</p>
-							<p>13.132</p>
-							<p class="last">13.61</p>
-							<p class="progress" style="width: 0.36%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买23</p>
-							<p class="trading-redcolor">0.001600</p>
-							<p>12.711</p>
-							<p class="last">3.08</p>
-							<p class="progress" style="width: 0.08%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买24</p>
-							<p class="trading-redcolor">0.001573</p>
-							<p>12.496</p>
-							<p class="last">13.30</p>
-							<p class="progress" style="width: 0.35%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买25</p>
-							<p class="trading-redcolor">0.001557</p>
-							<p>12.369</p>
-							<p class="last">5.10</p>
-							<p class="progress" style="width: 0.13%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买26</p>
-							<p class="trading-redcolor">0.001552</p>
-							<p>12.329</p>
-							<p class="last">5.90</p>
-							<p class="progress" style="width: 0.15%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买27</p>
-							<p class="trading-redcolor">0.001538</p>
-							<p>12.218</p>
-							<p class="last">18.31</p>
-							<p class="progress" style="width: 0.49%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买28</p>
-							<p class="trading-redcolor">0.001532</p>
-							<p>12.170</p>
-							<p class="last">25.73</p>
-							<p class="progress" style="width: 0.68%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买29</p>
-							<p class="trading-redcolor">0.001530</p>
-							<p>12.155</p>
-							<p class="last">15.07</p>
-							<p class="progress" style="width: 0.4%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买30</p>
-							<p class="trading-redcolor">0.001493</p>
-							<p>11.861</p>
-							<p class="last">6.80</p>
-							<p class="progress" style="width: 0.18%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买31</p>
-							<p class="trading-redcolor">0.001474</p>
-							<p>11.710</p>
-							<p class="last">5.90</p>
-							<p class="progress" style="width: 0.15%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买32</p>
-							<p class="trading-redcolor">0.001452</p>
-							<p>11.535</p>
-							<p class="last">17.20</p>
-							<p class="progress" style="width: 0.46%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买33</p>
-							<p class="trading-redcolor">0.001445</p>
-							<p>11.479</p>
-							<p class="last">5.20</p>
-							<p class="progress" style="width: 0.13%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买34</p>
-							<p class="trading-redcolor">0.001425</p>
-							<p>11.320</p>
-							<p class="last">5.00</p>
-							<p class="progress" style="width: 0.13%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买35</p>
-							<p class="trading-redcolor">0.001276</p>
-							<p>10.137</p>
-							<p class="last">1.50</p>
-							<p class="progress" style="width: 0.04%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买36</p>
-							<p class="trading-redcolor">0.001271</p>
-							<p>10.097</p>
-							<p class="last">0.41</p>
-							<p class="progress" style="width: 0.01%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买37</p>
-							<p class="trading-redcolor">0.001267</p>
-							<p>10.065</p>
-							<p class="last">5.90</p>
-							<p class="progress" style="width: 0.15%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买38</p>
-							<p class="trading-redcolor">0.001266</p>
-							<p>10.057</p>
-							<p class="last">6.30</p>
-							<p class="progress" style="width: 0.16%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买39</p>
-							<p class="trading-redcolor">0.001264</p>
-							<p>10.041</p>
-							<p class="last">0.70</p>
-							<p class="progress" style="width: 0.01%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买40</p>
-							<p class="trading-redcolor">0.001073</p>
-							<p>8.524</p>
-							<p class="last">1.00</p>
-							<p class="progress" style="width: 0.02%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买41</p>
-							<p class="trading-redcolor">0.000970</p>
-							<p>7.706</p>
-							<p class="last">6.00</p>
-							<p class="progress" style="width: 0.16%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买42</p>
-							<p class="trading-redcolor">0.000550</p>
-							<p>4.369</p>
-							<p class="last">1.01</p>
-							<p class="progress" style="width: 0.02%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买43</p>
-							<p class="trading-redcolor">0.000421</p>
-							<p>3.344</p>
-							<p class="last">92.43</p>
-							<p class="progress" style="width: 2.47%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买44</p>
-							<p class="trading-redcolor">0.000194</p>
-							<p>1.541</p>
-							<p class="last">5.20</p>
-							<p class="progress" style="width: 0.13%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买45</p>
-							<p class="trading-redcolor">0.000191</p>
-							<p>1.517</p>
-							<p class="last">613.05</p>
-							<p class="progress" style="width: 16.43%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买46</p>
-							<p class="trading-redcolor">0.000063</p>
-							<p>0.500</p>
-							<p class="last">200.00</p>
-							<p class="progress" style="width: 5.36%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买47</p>
-							<p class="trading-redcolor">0.000002</p>
-							<p>0.015</p>
-							<p class="last">364.56</p>
-							<p class="progress" style="width: 9.77%;"></p>
-						</li>
-						<li role="button">
-							<p class="stall trading-redcolor">买48</p>
-							<p class="trading-redcolor">0.000001</p>
-							<p>0.007</p>
-							<p class="last">3730.00</p>
-							<p class="progress" style="width: 100%;"></p>
-						</li>
-					</ul>
-					<div class="iScrollVerticalScrollbar iScrollLoneScrollbar" style="overflow: hidden; pointer-events: none;">
-						<div class="iScrollIndicator" style="transition-duration: 0ms; display: block; height: 20px; transform: translate(0px, 0px) translateZ(0px); transition-timing-function: cubic-bezier(0.1, 0.57, 0.1, 1);"></div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="trading-record">
-		<div class="entrust-record">
-			<div class="current-entrust">
-				<div class="entrust-head">
-					<h3>正在进行的委托</h3>
-					<!---->
-				</div>
-				<div class="record-list">
-					<ul>
-						<li class="head">
-							<div class="item time">
-								<p>时间</p>
-							</div>
-							<div class="item">
-								<p><span>委托价</span>成交均价(BTC)</p>
-							</div>
-							<div class="item">
-								<p><span>委托量</span>成交量(QTUM)</p>
-							</div>
-							<div class="item">
-								<p><span>成交额</span>(BTC)</p>
-							</div>
-							<div class="item last">
-								<p>操作</p>
-							</div>
-						</li>
-						<!---->
-						<li>
-							<div class="bk-norecord" style="width:100%;padding:10px;text-align:center">
-								<p><i class="bk-ico info"></i>您还没有登录，请 <a href="/login" style="color: rgb(222, 33, 29); margin: 0px 5px;">登录</a> 或 <a href="/register" style="color: rgb(61, 193, 142); margin: 0px 5px;">注册</a> 后再尝试。</p>
-							</div>
-						</li>
-					</ul>
-				</div>
-			</div>
-			<div class="current-entrust">
-				<div class="entrust-head">
-					<h3>历史委托</h3>
-					<!---->
-				</div>
-				<div class="record-list">
-					<ul>
-						<li class="head">
-							<div class="item time">
-								<p>时间</p>
-							</div>
-							<div class="item">
-								<p><span>委托价</span>成交均价(BTC)</p>
-							</div>
-							<div class="item">
-								<p><span>委托量</span>成交量(QTUM)</p>
-							</div>
-							<div class="item">
-								<p><span>成交额</span>(BTC)</p>
-							</div>
-							<div class="item last">
-								<p>操作</p>
-							</div>
-						</li>
-						<!---->
-						<li>
-							<div class="bk-norecord" style="width:100%;padding:10px;text-align:center">
-								<p><i class="bk-ico info"></i>您还没有登录，请 <a href="/login" style="color: rgb(222, 33, 29); margin: 0px 5px;">登录</a> 或 <a href="/register" style="color: rgb(61, 193, 142); margin: 0px 5px;">注册</a> 后再尝试。</p>
-							</div>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</div>
-		<div class="newest-record">
-			<div class="newest-top">
-				<h3>最新成交</h3>
-			</div>
-			<div class="newest-head">
-				<el-table :data="new_trade" fit highlight-current-row style="width: 100%;margin-top:20px">
-					<el-table-column align="center" label="成交时间" width='100'>
-						<template slot-scope="scope">
-							<span>{{scope.row.date}}</span>
+    <div class="trading-count">
+        <div class="l-area">
+            <div class="current-price">
+                <div class="coin-icon"></div>
+                <h2>{{ son_ket.vName +'/'+fa_ket.vName}} <span class="text-second trading-greencolor">{{tradeMarketPrize.price }}</span></h2>
+                <p>≈ {{ tradeMarketPrize.priceQC }}CNY</p>
+            </div>
+            <div class="num">24H{{$t(`ranking['涨跌幅']`)}}<br><span class="text-second trading-greencolor">{{tradeMarketPrize.roseFall}}</span></div>
+            <div class="num">24H{{$t(`ranking['最高价']`)}}<br><span aria-label="折合:16.977 USD" class="trading-redcolor hint--bottom">{{tradeMarketPrize.maxprize}}</span></div>
+            <div class="num">24H{{$t(`ranking['最低价']`)}}<br><span aria-label="折合:15.309 USD" class="trading-greencolor hint--bottom">{{tradeMarketPrize.minprize}}</span></div>
+            <div class="num">24H{{$t(`ranking['总价']`)}}<br><span class="trading-darkcolor">
+            {{tradeMarketPrize.sumprize}}</span></div>
+        </div>
+        <div class="r-area"><a role="button" onclick="$('.trading-chart').toggle()" style="margin-right: 15px;">{{$t(`ranking['收起/展开K线']`)}}</a></div>
+    </div>
+    <div class="trading-chart">
+        <!---->
+        <div class="chart-area">
+            <div class="common-box chart-box">
+                <div class="chart-box-head">
+                    <div class="l-area">
+                        <div class="item">
+                            <p :class="current ? 'active' : ''" @click='current = true'>{{$t(`ranking['K线图']`)}}</p>
+                        </div>
+                        <div class="item">
+                            <p :class="!current ? 'active' : ''" @click='current = false'>{{$t(`ranking['深度图']`)}}</p>
+                        </div>
+                    </div>
+                    <div class="r-area">
+                        <div class="item arrow">
+                            <!--                            <p>价格显示：<span>CNY</span></p>-->
+                            <!--
+                            <ul class="item-list">
+                                <li role="button">默认</li>
+                                <li role="button" class="active">USD</li>
+                                <li role="button">CNY</li>
+                            </ul>
+-->
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-box-body" v-show='!current'>
+                    <chart :options="polar" :style='{width:width+"px"}'></chart>
+                </div>
+                <div class="chart-box-body" id="chart-box-body" v-show='current'>
+                    <!---->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="trading-hotspot">
+        <div class="trading-form">
+            <div class="form-tab">
+                <ul>
+                    <li class="active">{{$t(`ranking['限价委托']`)}}</li>
+                    <!---->
+                </ul>
+                <div class="operation">
+                    <!--                   <a role="button" class="switch">价格输入转换<i></i></a>-->
+                    <!---->
+                </div>
+            </div>
+            <div class="form-lever-panel">
+                <!---->
+                <!---->
+            </div>
+            <div class="form-content">
+                <div class="box trading-buy">
+                    <h2>买入{{son_ket.vName}}</h2>
+                    <p class="form-assets">
+                        {{$t(`ranking['可用']`)}}{{fa_ket.vName}}：<span aria-label="可买：-- QTUM" class="trading-redcolor hint--top">{{buy_form.money}}</span>
+                        <!---->
+                        <!---->
+                    </p>
+                    <!---->
+                    <!---->
+                    <!---->
+                    <div class="form-group">
+                        <div class="form-control">
+                            <input v-model='buy_form.price' class="buyColor" type='number' @change='check_buy_price'>
+                            <label>{{$t(`ranking['买入价']`)}}{{son_ket.vName}}{{$t(`ranking['单价']`)}}({{$t(`ranking['单位']`)}}{{fa_ket.vName}})&nbsp;&nbsp;&nbsp;&nbsp;  {{$t(`ranking['最小值']`)}}： {{buy_form.minBuyPrize}}--
+                            {{$t(`ranking['最大值']`)}}{{buy_form.maxBuyPrize}}</label>
+                            <!---->
+                            <!--                            <span style="margin-right:20px">≈<b class="sellColor">{{buy_form.price * equal}}</b> USD</span>-->
+                        </div>
+                    </div>
+                    <!---->
+                    <div class="form-group active">
+                        <div class="form-control"><input type="number" @keyup='check_buy_number' v-model='buy_form.number' class="sellColor"> <label>{{$t(`ranking['买入量']`)}}{{son_ket.vName}}{{$t(`ranking['数量']`)}}</label></div>
+                        <div class="bk-trans-form">
+                        </div>
+                    </div>
+                    <p class="form-assets">{{$t(`ranking['预计交易额']`)}}：--{{buy_form.price * buy_form.number || ''}}
+                        <!--                    <span class="trading-redcolor hint--top-left" aria-label="折合:17287.410 USD">2.17602515</span> {{fa_ket.vName}}-->
+
+                    </p>
+                    <p>
+                        <el-slider v-model='buy_form.silder' @change='buy_slider'>
+                        </el-slider>
+                    </p>
+                    <!---->
+                    <div class="form-button"><button type="button" role="button" class="trading-redbg disabled" v-if='!$store.state.isLogin'><a href='./index#login'>{{$t(`ranking['登录/注册']`)}}</a></button></div>
+                    <div class="form-button"><button type="button" role="button" class="trading-redbg disabled" v-if='$store.state.isLogin' @click='buy_bizhong'>{{$t(`ranking['买入']`)}}</button></div>
+                </div>
+                <div class="box trading-sell">
+                    <h2>{{$t(`ranking['卖出']`)}}{{son_ket.vName}}</h2>
+                    <p class="form-assets">
+                        {{$t(`ranking['可用']`)}}{{son_ket.vName}}：<span aria-label="可卖：-- BTC" class="trading-greencolor hint--top">{{sell_form.money}}</span>
+                        <!---->
+                        <!---->
+                    </p>
+                    <!---->
+                    <div class="form-group">
+                        <div class="form-control">
+                            <input type="number" v-model='sell_form.price' @keyup='check_sell_price' class="sellColor"><label>{{$t(`ranking['卖出价']`)}}{{son_ket.vName}}{{$t(`ranking['单价']`)}}({{$t(`ranking['单位']`)}}{{fa_ket.vName}})&nbsp;&nbsp;&nbsp;&nbsp; {{$t(`ranking['最小值']`)}}： {{sell_form.minSellPrize}}--
+                            {{$t(`ranking['最大值']`)}}{{sell_form.maxSellPrize}}</label>
+                            <!---->
+                            <!--                            <span style="margin-right:20px">≈<b class="sellColor">{{sell_form.price * equal}}</b> USD</span>-->
+                        </div>
+                    </div>
+                    <!---->
+                    <!---->
+                    <!---->
+                    <div class="form-group">
+                        <div class="form-control">
+                            <input type="number" @keyup='check_sell_number' v-model='sell_form.number' class="sellColor">
+                            <label>{{$t(`ranking['卖出量']`)}}{{son_ket.vName}}{{$t(`ranking['数量']`)}}</label>
+                        </div>
+                        <div class="bk-trans-form">
+                        </div>
+                    </div>
+                    <p class="form-assets">{{$t(`ranking['预计交易额']`)}}：--{{sell_form.price * sell_form.number || ''}}
+                        <!--                    <span class="trading-greencolor hint--top-left" aria-label="折合:17287.410 USD">2.17602515</span> {{fa_ket.vName}}-->
+                    </p>
+                    <p>
+                        <el-slider  v-model='sell_form.silder' @change='sell_slider'>
+                        </el-slider>
+                    </p>
+                    <!---->
+                    <div class="form-button">
+                        <button type="button" role="button" class="trading-greenbg disabled" v-if='!$store.state.isLogin'><a href='./index#login'>{{$t(`ranking['登录/注册']`)}}</a></button>
+                        <button type="button" role="button" class="trading-greenbg disabled" v-if='$store.state.isLogin' @click='sell_bizhong'>{{$t(`ranking['卖出']`)}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="trading-disc" assist-price="[object Object]">
+            <div class="disc-head">
+                <p class="stall"><span>{{$t(`ranking['档位']`)}}</span></p>
+                <p><span>{{$t(`ranking['单价']`)}}({{fa_ket.vName}})</span></p>
+<!--                <p><span>{{$t(`ranking['折价']`)}}(USD)</span></p>-->
+                <p class="last"><span>{{$t(`ranking['总数量']`)}}({{son_ket.vName}})</span></p>
+            </div>
+            <div class="disc-list">
+                <div id="asksDish" class="sell-disc disc-inner" style="touch-action: none;">
+                    <ul style="transition-timing-function: cubic-bezier(0.1, 0.57, 0.1, 1); transition-duration: 500ms; <!--transform: translate(0px, -952px) translateZ(0px);-->">
+                        <li role="button" v-for='(item,index) in buyData'>
+                            <p class="stall trading-greencolor">{{$t(`ranking['卖']`)}}{{index + 1}}</p>
+                            <p class="trading-greencolor">{{item. prize}}</p>
+                            <p>{{item.amount}}</p>
+                            <p class="last">{{item.poolCount}}</p>
+                            <p class="progress" style="width: 0.92%;"></p>
+                        </li>
+                    </ul>
+                    <div class="iScrollVerticalScrollbar iScrollLoneScrollbar" style="overflow: hidden; pointer-events: none;">
+                        <div class="iScrollIndicator" style="transition-duration: 500ms; display: block; height: 19px; transform: translate(0px, 125px) translateZ(0px); transition-timing-function: cubic-bezier(0.1, 0.57, 0.1, 1);"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="disc-line"></div>
+<!--            <div class="disc-price">-->
+                <div class="disc-head">
+                <p class="stall"><span>{{$t(`ranking['档位']`)}}</span></p>
+                <p><span>{{$t(`ranking['单价']`)}}({{fa_ket.vName}})</span></p>
+<!--                <p><span>{{$t(`ranking['折价']`)}}(USD)</span></p>-->
+                <p class="last"><span>{{$t(`ranking['总数量']`)}}({{son_ket.vName}})</span></p>
+            	</div>
+<!--            </div>-->
+            <div class="disc-line"></div>
+            <div class="disc-list">
+                <div id="bidsDish" class="buy-disc disc-inner" style="touch-action: none;">
+                    <ul style="transition-timing-function: cubic-bezier(0.1, 0.57, 0.1, 1); transition-duration: 0ms; transform: translate(0px, 0px) translateZ(0px);">
+                        <li role="button" v-for='(item,index) in sellData'>
+                            <p class="stall trading-redcolor">{{$t(`ranking['买']`)}}{{index+0}}</p>
+                            <p class="trading-redcolor">{{item. prize}}</p>
+                            <p>{{item.amount}}</p>
+                            <p class="last">{{item.poolCount}}</p>
+                            <p class="progress" style="width: 0.92%;"></p>
+                        </li>
+                    </ul>
+                    <div class="iScrollVerticalScrollbar iScrollLoneScrollbar" style="overflow: hidden; pointer-events: none;">
+                        <div class="iScrollIndicator" style="transition-duration: 0ms; display: block; height: 20px; transform: translate(0px, 0px) translateZ(0px); transition-timing-function: cubic-bezier(0.1, 0.57, 0.1, 1);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="trading-record">
+        <div class="entrust-record">
+            <div class="current-entrust">
+                <div class="entrust-head">
+                    <h3>{{$t(`ranking['正在进行的委托']`)}}</h3>
+                    <!---->
+                </div>
+                <div class="record-list">
+                    <div class="bk-norecord" style="width:100%;padding:10px;text-align:center">
+                        <p v-if='!$store.state.isLogin'><i class="bk-ico info"></i>{{$t(`ranking['您还没有登录']`)}}，{{$t(`ranking['请']`)}} <a href="./index#login" style="color: rgb(222, 33, 29); margin: 0px 5px;">{{$t(`ranking['登录']`)}}</a>{{$t(`ranking['或']`)}} <a href="./index#register" style="color: rgb(61, 193, 142); margin: 0px 5px;">{{$t(`ranking['注册']`)}}</a>{{$t(`ranking['后再尝试']`)}} 。</p>
+                        <div v-if='$store.state.isLogin'>
+                            <el-table :data="nowingData" border v-loading='nowingloading' stripe style="width: 100%">
+                                <el-table-column prop="date" :label="$t(`ranking['时间']`)" align='center' >
+                                    <template slot-scope="scope">
+                                    <span>{{ scope.row.lastUpdateTime  | parseTime('{y}-{m}-{d}')}}</span>
+                                  </template>
+                                </el-table-column>
+                                <el-table-column prop="name" :label="$t(`ranking['成交总金额']`)+'('+fa_ket.vName +')'" width="180" align='cneter'>
+                                    <template slot-scope="scope">
+                                    <span>{{ scope.row.poolCount }}</span>
+                                  </template>
+                                </el-table-column>
+                                <el-table-column prop="name" :label="$t(`ranking['剩余可交易的数量']`)" align='cneter'>
+                                    <template slot-scope="scope">
+                                    <span>{{ scope.row.leftAmount }}</span>
+                                  </template>
+                                </el-table-column>
+                                 <el-table-column  label='均价' align='center'>
+                                    <template slot-scope="scope">
+                                    <span>{{ scope.row.averagePrize }}</span>
+                                  </template>
+                                </el-table-column>
+                                 <el-table-column  label='已成交折算金额' align='center'>
+                                    <template slot-scope="scope">
+                                    <span>{{ scope.row.amount - scope.row.leftAmount }}</span>
+                                  </template>
+                                </el-table-column>
+                                <el-table-column prop="address" label="类型" align='center'>
+                                    <template slot-scope="scope">
+                                    <span>{{ scope.row.entrustType ? $t(`ranking['卖出']`) : $t(`ranking['买入']`) }}</span>
+                                  </template>
+                                </el-table-column>
+                                <el-table-column prop="address" :label="$t(`ranking['操作']`)" align='center'>
+                                    <template slot-scope="scope">
+                                     <el-button type='success' size='mini' @click='cancael(scope.row.id)'>撤销</el-button>
+                                  </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="current-entrust">
+                <div class="entrust-head">
+                    <h3>{{$t(`ranking['历史委托']`)}}</h3>
+                    <!---->
+                </div>
+                <div class="record-list">
+                    <div class="bk-norecord" style="width:100%;padding:10px;text-align:center">
+                        <p v-if='!$store.state.isLogin'><i class="bk-ico info"></i>{{$t(`ranking['您还没有登录']`)}}，{{$t(`ranking['请']`)}} <a href="./index#login" style="color: rgb(222, 33, 29); margin: 0px 5px;">{{$t(`ranking['登录']`)}}</a>{{$t(`ranking['或']`)}} <a href="./index#register" style="color: rgb(61, 193, 142); margin: 0px 5px;">{{$t(`ranking['注册']`)}}</a>{{$t(`ranking['后再尝试']`)}} 。</p>
+                        <div v-if='$store.state.isLogin'>
+                            <el-table :data="historyData" border v-loading='historyloading' stripe style="width: 100%">
+                                <el-table-column prop="date" :label="$t(`ranking['时间']`)" align='center' width="180">
+                                    <template slot-scope="scope">
+                                    <span>{{ scope.row.lastUpdateTime  | parseTime('{y}-{m}-{d}')}}</span>
+                                  </template>
+                                </el-table-column>
+                                <el-table-column  :label="$t(`ranking['成交总金额']`)+'('+son_ket.vName +')'" width="180" align='center'>
+                                    <template slot-scope="scope">
+                                    <span>{{ scope.row.leftCount }}</span>
+                                  </template>
+                                </el-table-column> 
+							   <el-table-column  label='成交均价' align='center'>
+                                    <template slot-scope="scope">
+                                    <span>{{ scope.row.averagePrize }}</span>
+                                  </template>
+                                </el-table-column>
+                                <el-table-column prop="address" label="类型" align='center'>
+                                    <template slot-scope="scope">
+                                    <span>{{ scope.row.entrustType ? $t(`ranking['卖出']`) : $t(`ranking['买入']`) }}</span>
+                                  </template>
+                                </el-table-column>
+                                <el-table-column prop="address" label="折算总价" align='center'>
+                                    <template slot-scope="scope">
+                                    <span>{{ scope.row.poolCount }}</span>
+                                  </template>
+                                </el-table-column>
+                            </el-table>
+                               <div class="pagination">
+<!--
+								<el-pagination
+								@current-change="handleCurrentChange"
+								:current-page="currentPage4"
+								:page-sizes="[5]"
+								background
+								layout="total, sizes, prev, pager, next, jumper"
+								:total="total">
+								</el-pagination>
+-->
+                               </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="newest-record">
+            <div class="newest-top">
+                <h3>{{$t(`ranking['最新成交']`)}}</h3>
+            </div>
+            <div class="newest-head">
+                <el-table :data="newData" fit highlight-current-row style="width: 100%;margin-top:20px">
+                    <el-table-column align="center" :label="$t(`ranking['时间']`)" width='100'>
+                        <template slot-scope="scope">
+							<span>{{scope.row.lastUpdateTime | parseTime('{y}-{m}-{d}')}}</span>
 						</template>
-					</el-table-column>
-					<el-table-column align="center" label="成交价(BTC)">
-						<template slot-scope="scope">
-							<span>{{scope.row.BTC}}</span>
+                    </el-table-column>
+                    <el-table-column align="center" :label="$t(`ranking['均价']`)">
+                        <template slot-scope="scope">
+							<span>{{scope.row.averagePrize}}</span>
 						</template>
-					</el-table-column>
-					<el-table-column align="center" label="折扣(USD)">
-						<template slot-scope="scope">
-							<span>{{scope.row.USD}}</span>
+                    </el-table-column>
+                    <el-table-column align="center" :label="$t(`ranking['折价']`)">
+                        <template slot-scope="scope">
+							<span>{{scope.row.poolCount}}</span>
 						</template>
-					</el-table-column>
-					<el-table-column align="center" label="交易量(QTUM)">
-						<template slot-scope="scope">
-							<span>{{scope.row.QTUM}}</span>
+                    </el-table-column>
+                    <el-table-column align="center" :label="$t(`ranking['交易量']`)">
+                        <template slot-scope="scope">
+							<span>{{scope.row.amount}}</span>
 						</template>
-					</el-table-column>
-				</el-table>
-			</div>
-		</div>
-	</div>
-	<!---->
-	<!---->
-	<!---->
+                    </el-table-column>
+                </el-table>
+            </div>
+        </div>
+    </div>
+    <!---->
+    <!---->
+    <!---->
 </div>
 </div>
 </template>
 <script>
-	import Get from '@/api/get'
-	import Post from '@/api/post'
-	export default {
-		name: 'transaction',
-		data() {
-			return {
-				current:0,
-				loading: false,
-				width: null,
-				current: true,
-				polar: {},
-				new_trade: [{
-					date: '2017-08-12',
-					BTC: '0.001927',
-					USD: '0.1927',
-					QTUM: '0.1927',
-				}, {
-					date: '2017-08-12',
-					BTC: '0.001927',
-					USD: '0.1927',
-					QTUM: '0.1927',
-				}, {
-					date: '2017-08-12',
-					BTC: '0.001927',
-					USD: '0.1927',
-					QTUM: '01927',
-				}, {
-					date: '2017-08-12',
-					BTC: '0.001927',
-					USD: '0.1927',
-					QTUM: '0.1927',
-				}],
-				father_market: [],
-				son_market: [],
+    import kline_api from '@/config'
+    console.log(kline_api, '1')
+    import Get from '@/api/get'
+    import Post from '@/api/post'
+    export default {
+        name: 'transaction',
+        data() {
+            return {
+				currentPage4:1,
+				total:10,
+                loading: false,
+                buyData: [], //买入表格
+                sellData: [], //买入表格
+                newData: [], //最新成交
+                current: 1,
+                father_current: 0, //定义主市场是哪个
+                son_current: 0, //定义子市场是哪个
+                tradeMarketPrize: {
+                    sumprize: "", //24h总价     
+                    maxprize: "", //24h最大价格
+                    minprize: "", //24h最小价格	
+                    price: "", //24h最小价格	
+                    priceQC: "", //24h最小价格	
+                },
+                equal: 0, //比率
+                sixnumer: 6, //限制最小保留次数
+                width: null,
+                current: true,
+                polar: {},
+                father_market: [],
+                son_market: [],
+
+                son_ket: {
+                    bId: '',
+                    vName: '',
+                },
+                fa_ket: {
+                    bId: '',
+                    vName: ''
+                },
+                buy_form: {
+                    price: '',
+                    number: '',
+                    money: '',
+                    silder: 0,
+                    maxBuyPrize: '',
+                    minBuyPrize: '',
+                },
+                sell_form: {
+                    price: '',
+                    number: '',
+                    money: '',
+                    silder: 0,
+                    maxSellPrize: '',
+                    minSellPrize: '',
+                },
+                historyData: [],
+                nowingData: [],
+                nowingloading: false,
+                historyloading: false,
+                kline: null
+            }
+        },
+        watch: {
+            'deepData': res => {
+                console.log(res)
+
+            }
+        },
+        created() {
+            this.$sock.connect({}, frame => {
+                this.$sock.send("/app/sendBuy", {}, JSON.stringify({
+                    "symbol": 'BTC_QC'
+                }));
+                this.$sock.send("/app/sendSell", {}, JSON.stringify({
+                    "symbol": 'BTC_QC'
+                }));
+                this.$sock.send("/app/sendDepth", {}, JSON.stringify({
+                    "symbol": 'BTC_QC'
+                }));
+                this.$sock.send("/app/sendNewest", {}, JSON.stringify({
+                    "symbol": 'BTC_QC'
+                }));
+                this.$sock.send("/app/sendKline", {}, JSON.stringify({
+                    "symbol": 'BTC_QC'
+                }));
+                this.$sock.subscribe(`/topic/subscribeBuy`, data => {
+                    if (JSON.parse(data.body) + '' === 'null') {
+                        return
+                    }
+                    this.buyData = JSON.parse(data.body);
+                }) /*买出的数据*/
+                this.$sock.subscribe(`/topic/subscribeSell`, data => {
+                    if (JSON.parse(data.body) + '' === 'null') {
+                        return
+                    }
+                    this.sellData = JSON.parse(data.body);
+                }) /*买出的数据*/
+                this.$sock.subscribe(`/topic/subscribeNewest`, data => {
+                    if (JSON.parse(data.body) + '' === 'null') {
+                        return
+                    }
+                    this.newData = JSON.parse(data.body);
+                }) /*买出的数据*/
+
+                this.$sock.subscribe(`/topic/subscribeDepth`, data => {
+                    if (JSON.parse(data.body) + '' === 'null') {
+                        return
+                    }
+                    var res = this.getDeepData(JSON.parse(data.body));
+                    this.polar = {
+                        tooltip: {
+                            trigger: 'axis',
+                            backgroundColor: '#F7F7F7',
+                            textStyle: {
+
+                                color: '#000'
+                            },
+                            borderWidth: '2',
+                            borderColor: 'rgba(0,0,0,.4)'
+                            //				position: function(pt) {
+                            //					return [pt[0], '10%'];
+                            //				}
+                        },
+                        grid: {
+                            left: '2%',
+                            right: '2%',
+                            bottom: '2%',
+                            top: '2%',
+                            containLabel: true
+                        },
+                        toolbox: {
+                            feature: {
+                                dataZoom: {
+                                    yAxisIndex: 'none'
+                                },
+                                restore: {},
+                                saveAsImage: {}
+                            }
+                        },
+                        xAxis: {
+                            type: 'value',
+                            boundaryGap: false,
+                            splitLine: {
+                                show: false
+                            }
+                        },
+                        yAxis: {
+                            type: 'value',
+                            boundaryGap: [0, '100%'],
+                            axisLine: {
+                                show: true
+                            },
+                            axisLabel: {
+                                show: true
+                            }
+                        },
+                        series: [{
+                            name: '买单',
+                            type: 'line',
+                            smooth: true,
+                            showSymbol: false,
+                            sampling: 'average',
+                            itemStyle: {
+                                normal: {
+                                    color: '#E65855'
+                                }
+                            },
+                            lineStyle: {
+                                color: '#E65855',
+                                width: 3
+                            },
+                            areaStyle: {},
+                            data: res.asks.map(function(e) {
+                                return [e[1], e[0]]
+                            })
+                        }, {
+                            name: '实收',
+                            type: 'line',
+                            smooth: true,
+                            showSymbol: false,
+                            sampling: 'average',
+                            itemStyle: {
+                                normal: {
+                                    color: '#64D694'
+                                },
+
+                            },
+                            lineStyle: {
+                                color: '#64D694',
+                                width: 3
+                            },
+                            //				symbolSize: 12,
+                            //				symbol: "circle", // 默认是空心圆（中间是白色的），改成实心圆
+                            //				markPoint: {
+                            //					label: {
+                            //						normal: {
+                            //							fontSize: 16
+                            //						}
+                            //					},
+                            //					itemStyle: {
+                            //						normal: {
+                            //							color: '#ccc',
+                            //						}
+                            //					}
+                            //				},
+                            areaStyle: {},
+                            data: res.bids.map(function(e) {
+                                return [e[1], e[0]]
+                            })
+                        }]
+                    };
+                }) /*深度图的数据*/
+            })
+            this.width = screen.availWidth - 350 - 20;
+            Get({
+                url: 'basisMarket/selBasisMarket',
+                success: res => {
+                    if (res.code === 0) {
+                        this.father_market = res.data;
+                        this.fa_ket = res.data[0];
+                        this.selcurrencyManage(this.fa_ket);
+                    }
+                }
+            })
+        },
+        methods: {
+			handleCurrentChange(){
 				
-				son_ket: {
-					id: '',
-					name: '',
-				},
-				fa_ket: {
-					bId: '',
-					vName: ''
-				}
-			}
-		},
-		created() {
-			var data = {
-				"asks": [
-					[
-						"32.831",
-						"0.083"
-					],
-					[
-						"10.831",
-						"1.083"
-					],
-					[
-						"8.831",
-						"2.083"
-					],
-					[
-						"7.831",
-						"3.083"
-					],
-					[
-						"6.831",
-						"4.083"
-					],
-				],
-				"bids": [
-					[
-						"30.434",
-						"10.766"
-					],
-					[
-						"30.434",
-						"9.766"
-					],
-					[
-						"30.434",
-						"8.766"
-					],
-					[
-						"7.434",
-						"6.766"
-					],
-				],
-			}
-			this.polar = {
-				tooltip: {
-					trigger: 'axis',
-					backgroundColor: '#F7F7F7',
-					textStyle: {
+			},
+            cancael(id) {
+                this.loading = true;
+                Get({
+                    url: 'pool/revocationPool',
+                    data: {
+                        id: id
+                    },
+                    success: res => {
+                        this.loading = false;
+                        if (res.code === 0) {
+                            this.$message({
+                                message: '撤销成功',
+                                type: 'success',
+                                duration: 5000
+                            });
+                            this.selPool(this.son_ket.vName + '_' + this.fa_ket.vName)
+                        } else {
+                            this.$message({
+                                message: '撤销失败',
+                                type: 'error',
+                                duration: 5000
+                            });
+                        }
+                    },
+                    fail: res => {
+                        this.loading = false;
+                    }
+                })
+            },
+            buy_slider(e) {
+                this.buy_form.number = this.buy_form.money * e / 100;
+            },
+            sell_slider(e) {
+                this.sell_form.number = this.sell_form.money * e / 100;
+            },
+            buy_bizhong() {
+                if (this.buy_form.price === '' || this.buy_form.number === '') {
+                    this.$message({
+                        message: '内容不完整',
+                        type: 'warning',
+                        duration: 2000
+                    });
+                    return
+                }
+                this.loading = true;
+                Post({
+                    url: 'pool/addBuyPool',
+                    data: {
+                        tradeMarket: this.son_ket.vName + '_' + this.fa_ket.vName,
+                        entrustType: 0,
+                        prize: this.buy_form.price,
+                        amount: this.buy_form.number,
+                        currId: this.son_ket.vId,
+                        basisId: this.fa_ket.bId,
+                    },
+                    success: res => {
+                        this.loading = false;
+                        if (res.code === 0) {
+                            this.$message({
+                                message: '买入成功',
+                                type: 'success',
+                                duration: 5000
+                            });
+                        } else {
+                            this.$message({
+                                message: res.data,
+                                type: 'error',
+                                duration: 5000
+                            });
+                        }
+                    }
+                })
+            },
+            sell_bizhong() {
+                if (this.sell_form.price === '' || this.sell_form.number === '') {
+                    this.$message({
+                        message: '内容不完整',
+                        type: 'warning',
+                        duration: 2000
+                    });
+                    return
+                }
+                this.loading = true;
+                Post({
+                    url: 'pool/addSellPool',
+                    data: {
+                        tradeMarket: this.son_ket.vName + '_' + this.fa_ket.vName,
+                        entrustType: 0,
+                        prize: this.sell_form.price,
+                        amount: this.sell_form.number,
+                        currId: this.son_ket.vId,
+                        basisId: this.fa_ket.bId,
+                    },
+                    success: res => {
+                        this.loading = false;
 
-						color: '#000'
-					},
-					borderWidth: '2',
-					borderColor: 'rgba(0,0,0,.4)'
-					//				position: function(pt) {
-					//					return [pt[0], '10%'];
-					//				}
-				},
-				grid: {
-					left: '2%',
-					right: '2%',
-					bottom: '2%',
-					top: '2%',
-					containLabel: true
-				},
-				toolbox: {
-					feature: {
-						dataZoom: {
-							yAxisIndex: 'none'
-						},
-						restore: {},
-						saveAsImage: {}
-					}
-				},
-				xAxis: {
-					type: 'value',
-					boundaryGap: false,
-					splitLine: {
-						show: false
-					}
-				},
-				yAxis: {
-					type: 'value',
-					boundaryGap: [0, '100%'],
-					axisLine: {
-						show: false
-					},
-					axisLabel: {
-						show: false
-					}
-				},
-				series: [{
-					name: '买单',
-					type: 'line',
-					smooth: true,
-					showSymbol: false,
-					sampling: 'average',
-					itemStyle: {
-						normal: {
-							color: '#E65855'
-						}
-					},
-					lineStyle: {
-						color: '#E65855',
-						width: 3
-					},
-					areaStyle: {},
-					data: data.asks.map(function(e) {
-						return [e[1], e[0]]
-					})
-				}, {
-					name: '实收',
-					type: 'line',
-					smooth: true,
-					showSymbol: false,
-					sampling: 'average',
-					itemStyle: {
-						normal: {
-							color: '#64D694'
-						},
+                        if (res.code === 0) {
+                            this.$message({
+                                message: '买入成功',
+                                type: 'success',
+                                during: 5000
+                            });
+                        } else {
+                            this.$message({
+                                message: res.data,
+                                type: 'error',
+                            });
+                        }
+                    }
+                })
+            },
+            check_buy_price() {
+                var v = this.buy_form.price;
+                var max = this.buy_form.maxBuyPrize;
+                var min = this.buy_form.minBuyPrize;
+                var number = this.sixnumber;
+                if (v - 0) {
+                    var x = (v - 0).toFixed(number) - 0;
+                    this.buy_form.price = x;
+                }
+                if (v > max) {
+                    this.buy_form.price = max;
+                    this.$message({
+                        message: '请输入价格以内的数',
+                        type: 'error'
+                    });
+                    return
+                };
+                if (v < min) {
+                    this.buy_form.price = min;
+                    this.$message({
+                        message: '请输入价格以内的数',
+                        type: 'error'
+                    });
+                    return
+                }
 
-					},
-					lineStyle: {
-						color: '#64D694',
-						width: 3
-					},
-					//				symbolSize: 12,
-					//				symbol: "circle", // 默认是空心圆（中间是白色的），改成实心圆
-					//				markPoint: {
-					//					label: {
-					//						normal: {
-					//							fontSize: 16
-					//						}
-					//					},
-					//					itemStyle: {
-					//						normal: {
-					//							color: '#ccc',
-					//						}
-					//					}
-					//				},
-					areaStyle: {},
-					data: data.bids.map(function(e) {
-						return [e[1], e[0]]
-					})
-				}]
-			};
-			this.width = screen.availWidth - 350 - 20;
-			Get({
-				url: 'basisMarket/selBasisMarket',
-				success: res => {
-					console.log(res);
-					if (res.code === 0) {
-						this.father_market = res.data;
-						this.fa_ket = res.data[0];
-						this.selcurrencyManage(this.fa_ket);
-					}
-				}
-			})
+            },
+            check_buy_number() {
+                var v = this.buy_form.number;
+                var max = this.buy_form.maxBuyPrize;
+                var min = this.buy_form.minBuyPrize;
+                var number = this.sixnumber;
+                if (v - 0) {
+                    var x = (v - 0).toFixed(number) - 0;
+                    this.buy_form.number = x;
+                }
+                if (v * this.buy_form.price > this.buy_form.money) {
+                    this.$message({
+                        message: '可用余额不足',
+                        type: 'error'
+                    });
+                    this.buy_form.number = this.buy_form.money / this.buy_form.price
+                    return
+                }
+                //                if (v > max) {
+                //                    this.buy_form.price = max;
+                //                    this.$message({
+                //                        message: '请输入价格以内的数',
+                //                        type: 'error'
+                //                    });
+                //                    return
+                //                }
+            },
+            check_sell_number() {
+                var v = this.sell_form.number;
+                var max = this.sell_form.maxBuyPrize;
+                var min = this.sell_form.minBuyPrize;
+                var number = this.sixnumber;
+                if (v - 0) {
+                    var x = (v - 0).toFixed(number) - 0;
+                    this.sell_form.number = x;
+                }
+                if (v > this.sell_form.money) {
+                    this.$message({
+                        message: '可用数量不足',
+                        type: 'error'
+                    });
+                    this.sell_form.number = this.sell_form.money / this.sell_form.price
+                    return
+                }
+            },
+            check_sell_price() {
+                var v = this.sell_form.price;
+                var max = this.sell_form.maxSellPrize;
+                var min = this.sell_form.minSellPrize;
+                var number = this.sixnumber;
+                if (v - 0) {
+                    var x = (v - 0).toFixed(number) - 0;
+                    this.sell_form.price = x;
+                }
+                if (v > max) {
+                    this.sell_form.price = max;
+                    this.$message({
+                        message: '请输入价格以内的数',
+                        type: 'error'
+                    });
+                    return
+                }
+                if (v < min) {
+                    this.sell_form.price = min;
+                    this.$message({
+                        message: '请输入价格以内的数',
+                        type: 'error'
+                    });
+                    return
+                }
+            },
+            /**/
+            getDeepData(arr) {
+                var obj = {
+                    asks: [],
+                    bids: [],
+                }
+                for (var i = 0; i < arr.length; i++) {
+                    obj.asks[i] = [arr[i].buyPrice, arr[i].buyVolume]
+                    obj.bids[i] = [arr[i].sellPrice, arr[i].sellVolume]
+                }
+                return obj
+            },
+            /*切换父市场*/
+            check_father(item, index) {
+                this.father_current = index;
+                this.fa_ket = item;
+                this.selcurrencyManage(item);
+            },
+            /*切换子市场*/
+            check_son(raw) {
+                this.kline.setSymbol(raw.vName, 'USD/BTC');
+                this.son_ket = Object.assign({}, raw);
+                this.son_ket.vName = this.son_ket.vName.split('_')[0]
+                this.findprize(raw);
+                this.findNewPrice(raw);
+                this.findNewPriceBuVirtual(raw);
+                this.findUser(raw);
+                this.selPool(raw)
+                //                this.selAmountMoney(raw)
+            },
+            /*根据币种id查询当前用户钱包:*/
+            findUser(item) {
+                Get({
+                    url: 'pool/findUserVirtualCoinNum',
+                    data: {
+                        id: item.vId
+                    },
+                    success: res => {
+                        this.loading = false;
+                        if (res.code === 0) {
+                            this.sell_form.money = res.data.vTotal;
+                        }
+                    },
+                    fail: res => {
+                        this.loading = false;
+                    }
+                })
+                Get({
+                    url: 'pool/findUserVirtualCoinNum',
+                    data: {
+                        id: this.fa_ket.vId
+                    },
+                    success: res => {
+                        this.loading = false;
+                        if (res.code === 0) {
+                            this.buy_form.money = res.data.vTotal;
+                        }
+                    },
+                    fail: res => {
+                        this.loading = false;
+                    }
+                })
+            },
+            /*根据交易市场查询最新交易价格*/
+            findNewPrice(item) {
+                Post({
+                    url: 'basisMarket/findNewPrice',
+                    data: {
+                        name: item.vName
+                    },
+                    success: res => {
+                        this.loading = false;
+                        if (res.code === 0) {
+                            this.tradeMarketPrize.price = res.data.price;
+                            this.tradeMarketPrize.priceQC = res.data.priceQC;
+                        }
+                    },
+                    fail: res => {
+                        this.loading = false;
+                    }
+                })
+            },
+            /*根据币种名称查询最新交易价格*/
+            findNewPriceBuVirtual(item) {
+                Post({
+                    url: 'basisMarket/findNewPriceBuVirtual',
+                    data: {
+                        name: item.vName
+                    },
+                    success: res => {
+                        this.loading = false;
+                        if (res.code === 0) {
+                            this.equal = res.data.price;
+                            this.sixnumber = res.data.decimalPlaces;
+                        }
+                    },
+                    fail: res => {
+                        this.loading = false;
+                    }
+                })
+            },
+            /*查询子市场*/
+            selcurrencyManage(obj) {
+                this.loading = true;
+                Get({
+                    url: 'basisMarket/selcurrencyManage',
+                    data: {
+                        bId: obj.bId,
+                        vName: obj.vName,
+                    },
+                    success: res => {
+                        this.loading = false;
+                        if (res.code === 0) {
+                            this.son_market = res.data;
+                            this.son_ket = Object.assign({}, res.data[0]);
+                            this.son_ket.vName = this.son_ket.vName.split('_')[0]
+                            this.findprize(res.data[0]);
+                            this.findNewPrice(res.data[0]);
+                            this.findNewPriceBuVirtual(res.data[0]);
+                            this.findUser(res.data[0]);
+                            this.selCurrencyTraedSum(res.data[0]);
+                            this.selPool(res.data[0])
+                            this.kline.setSymbol(res.data[0].vName, 'USD/BTC');
+                            //                            this.selAmountMoney(res.data[0])
+                        } else {
+                            this.$message({
+                                message: res.data,
+                                type: 'error'
+                            })
+                        }
+                    },
+                    fail: res => {
+                        this.loading = false;
+                    }
+                })
+            },
+            /*新增稳妥*/
+            selAmount() {
+                Post({
+                    url: 'pool/addPool',
+                    data: {
+                        tradeMarket: "",
+                        entrustType: '',
+                        prize: "",
+                        amount: ''
+                    },
+                    success: res => {
+                        this.loading = false;
+                        if (res.code === 0) {}
+                    },
+                    fail: res => {
+                        this.loading = false;
+                    }
+                })
+            },
+            /*价格交易限制*/
+            selCurrencyTraedSum(item) {
+                Get({
+                    url: 'pool/findVManage',
+                    data: {
+                        currId: item.vId,
+                        basisId: this.fa_ket.bId,
+                    },
+                    success: res => {
+                        this.loading = false;
+                        if (res.code === 0) {
+                            this.buy_form.maxBuyPrize = res.data.maxBuyPrize;
+                            this.buy_form.minBuyPrize = res.data.minBuyPrize;
+                            this.sell_form.maxSellPrize = res.data.maxSellPrize;
+                            this.sell_form.minSellPrize = res.data.minSellPrize;
+                        }
+                    },
+                    fail: res => {
+                        this.loading = false;
+                    }
+                })
+            },
+            /*历史订单*/
+            selPool(item) {
+                this.nowingloading = true;
+                this.historyloading = true;
+                Get({
+                    url: 'pool/selPool',
+                    data: {
+                        teadeMarket: item.vName,
+                        pageNo: 1,
+                        pageSize: 5,
+                        lishi: '1'
+                    }, //
+                    success: res => {
+                        this.nowingloading = false;
+                        if (res.code === 0) {
+                            this.nowingData = res.data
+							console.log(res.data);
+                        }
+                    },
+                    fail: res => {
+                        this.nowingloading = false;
+                    }
+                });
+                Get({
+                    url: 'pool/selPool',
+                    data: {
+                        teadeMarket: item.vName,
+                        pageNo: 1,
+                        pageSize: 5,
+                        lishi: ''
+                    }, //历史
+                    success: res => {
+                        this.historyloading = false;
+                        if (res.code === 0) {
+                            this.historyData = res.data;
+							console.log(res.data);
+                        }
+                    },
+                    fail: res => {
+                        this.historyloading = false;
+                    }
+                })
+            },
+            /*涨跌幅*/
+            findprize(item) {
+                this.tradeMarketPrize.roseFall = item.roseFall;
+                Get({
+                    url: 'basisMarket/findprize',
+                    data: {
+                        tradeMarket: item.vName
+                    },
+                    success: res => {
+                        this.loading = false;
+                        if (res.code === 0) {
+                            this.tradeMarketPrize.sumprize = res.data.sumprize;
+                            this.tradeMarketPrize.maxprize = res.data.maxprize;
+                            this.tradeMarketPrize.minprize = res.data.minprize;
+                        }
+                    },
+                    fail: res => {
+                        this.loading = false;
+                    }
+                })
+            }
+        },
+        mounted() {
+            this.kline = new Kline({
+                element: "#chart-box-body",
+                width: $('.trading-chart').width(),
+                height: 400,
+                theme: 'light', // light/dark
+                language: 'zh-cn', // zh-cn/en-us/zh-tw
+                ranges: ["1d", "1h", "30m", "15m", "5m", "1m", "line"],
+                //                ranges: ["15m"],
+                symbol: this.son_ket.vName + '_' + this.fa_ket.vName,
+                symbolName: 'BTC_SC',
+                type: "poll", // 
+                limit: 1000,
+                intervalTime: 5000,
+                showTrade: false,
+                debug: false,
+                url: kline_api + 'webSocketServer',
+                subscribePath: "/topic/subscribeKline",
+                sendPath: "/app/sendKline",
+                enableSockjs: false,
+                debug: false,
+                disableFirebase: true
+            });
+            this.kline.draw();
+        },
 
-		},
-		methods: {
-			/*查询子市场*/
-			selcurrencyManage(obj) {
-				Get({
-					url: 'basisMarket/selcurrencyManage',
-					data: {
-						bId: obj.bId,
-						vName: obj.vName,
-					},
-					success: res => {
-						this.loading = false;
-						if (res.code === 0) {
-							this.son_market = res.data;
-							this.son_ket = res.data[0];
-						}
-					},
-					fail: res => {
-						this.loading = false;
-					}
-				})
-			},
-			/*查询余额*/
-			selAmount() {
-				Get({
-					url: 'pool/selAmount',
-					data: {
-						currId: this.son_ket.id
-					},
-					success: res => {
-						this.loading = false;
-						console.log(res);
-						if (res.code === 0) {}
-					},
-					fail: res => {
-						this.loading = false;
-					}
-				})
-			},
-			/*新增稳妥*/
-			selAmount() {
-				Post({
-					url: 'pool/addPool',
-					data: {
-						tradeMarket: "",
-						entrustType: '',
-						prize: "",
-						amount: ''
-					},
-					success: res => {
-						this.loading = false;
-						if (res.code === 0) {}
-					},
-					fail: res => {
-						this.loading = false;
-					}
-				})
-			},
-			/*币种交易数量小数位限制*/
-			selCurrencyDP() {
-				Get({
-					url: 'pool/addPool',
-					data: {
-						currId: this.son_ket.id
-					},
-					success: res => {
-						this.loading = false;
-						if (res.code === 0) {}
-					},
-					fail: res => {
-						this.loading = false;
-					}
-				})
-			},
-			/*价格交易限制*/
-			/*历史订单*/
-			selPool() {
-				this.loading = true;
-				Get({
-					url: 'pool/selPool',
-					data: {
-						id: '',
-						entrustType: '',
-						averagePrize: '',
-						leftAmount: '',
-						leftCount: '',
-					},
-					success: res => {
-						this.loading = false;
-						console.log(res);
-						if (res.code === 0) {}
-					},
-					fail: res => {
-						this.loading = false;
-					}
-				})
-			},
-			init(bId, vName) {
-				this.loading = true;
-				Get({
-					url: 'basisMarket/selBasisMarket',
-					data: {
-						bId: bId,
-						vName: vName
-					},
-					success: res => {
-						this.loading = false;
-						console.log(res);
-						if (res.code === 0) {}
-					},
-					fail: res => {
-						this.loading = false;
-					}
-				})
-			},
-			findprize(tradeMarket) {
-				Get({
-					url: 'basisMarket/findprize',
-					data: {
-						tradeMarket: tradeMarket
-					},
-					success: res => {
-						this.loading = false;
-						console.log(res);
-						if (res.code === 0) {}
-					},
-					fail: res => {
-						this.loading = false;
-					}
-				})
-			}
-		},
-		mounted() {
-			var kline = new Kline({
-				element: "#chart-box-body",
-				width: $('.trading-chart').width(),
-				height: 400,
-				theme: 'light', // light/dark
-				language: 'zh-cn', // zh-cn/en-us/zh-tw
-				ranges: ["1w", "1d", "1h", "30m", "15m", "5m", "1m", "line"],
-				symbol: "BTC",
-				symbolName: "BTC/USD",
-				type: "poll", // poll/socket
-				limit: 1000,
-				intervalTime: 5000,
-				showTrade: false,
-				debug: false,
-				url: "/static1/mock.json"
-			})
-			kline.draw();
-		},
-
-	}
+    }
 
 </script>
 
 <style>
-	@import '../../assets/transaction.css';
-	.section {
-		display: flex;
-		width: 100%;
-	}
-	
-	.market .has-gutter {
-		font-size: 12px;
-		font-weight: bold
-	}
-	
-	.market .el-table__row .cell span {
-		font-size: 12px;
-		white-space: nowrap;
-	}
-	
-	.newest-head .has-gutter .el-table td,
-	.newest-head .has-gutter .el-table th {
-		padding: 4px;
-	}
-	
-	.newest-head .has-gutter {
-		font-size: 12px;
-		font-weight: bold
-	}
-	
-	.newest-head tbody {
-		font-size: 12px;
-		white-space: nowrap;
-	}
-	
-	.el-table td,
-	.el-table th {
-		padding: 4px 0;
-	}
-	
-	.el-table td span,
-	.el-table th span {
-		white-space: nowrap;
-	}
-	
-	.el-table--scrollable-x .el-table__body-wrapper {
-		overflow-x: hidden;
-	}
-	
-	.echarts {
-		height: 422px;
-	}
+    @import '../../assets/transaction.css';
+    .section {
+        display: flex;
+        width: 100%;
+    }
+
+    .market .has-gutter {
+        font-size: 12px;
+        font-weight: bold
+    }
+
+    .market .el-table__row .cell span {
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .newest-head .has-gutter .el-table td,
+    .newest-head .has-gutter .el-table th {
+        padding: 4px;
+    }
+
+    .newest-head .has-gutter {
+        font-size: 12px;
+        font-weight: bold
+    }
+
+    .newest-head tbody {
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .el-table td,
+    .el-table th {
+        padding: 4px 0;
+    }
+
+    .el-table td span,
+    .el-table th span {
+        white-space: nowrap;
+    }
+
+    .el-table--scrollable-x .el-table__body-wrapper {
+        overflow-x: hidden;
+    }
+
+    .echarts {
+        height: 422px;
+    }
+
+    .trading-content {
+        border-left: 1px solid #ccc
+    }
 
 </style>

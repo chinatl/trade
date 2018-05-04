@@ -1,104 +1,63 @@
 <template>
 <header id="user-nav" class="header">
-	<div class="e-notice" v-show='show'>
-		<a class="text">关于变更虚拟币充值地址的公告</a>
-		<i class="el-icon-close" @click='show = false'></i>
+	<div class="e-notice" v-show='current'>
+		<a href="./index#blog" class="text" style='font-size:14px'>{{$t('menu["提示"]')}}</a>
+		<i class="el-icon-close" @click='current = false'></i>
 	</div>
 	<div class="h-content">
 		<div class="h-box">
 			<div class="subscription">
-				<a href="./index">主页</a>
+				<a href='./index' style='font-size:14px'>{{$t('menu["主页"]')}}</a>
+			</div>
+			<div class="subscription flags " style="margin-left: 20px;">
+				<a href="javacript:;" style='font-size:14px;color:#ff9d11'>{{$t('menu["专业交易"]')}}</a>
 			</div>
 			<div class="subscription" style="margin-left: 20px;">
-				<a href="javacript:void(null)">专业交易</a>
-			</div>
-			<div class="subscription" style="margin-left: 20px;">
-				<a href="./index#ranking">交易排行榜</a>
+				<p role="button"><a href='./index#ranking' style='font-size:14px'>{{$t('menu["交易排行榜"]')}}</a></p>
 			</div>
 			<div class="site-menu cart">
-				<p role="button">网站导航</p>
+				<p role="button">{{$t('menu["网站导航"]')}}</p>
 				<div class="site-menu-dropdown">
 					<ul>
-						<li><a href="/help/display?cid=4012&amp;fid=4" target="_self">上币申请</a></li>
-						<li><a href="/help" target="_self">帮助</a></li>
-						<li><a href="/blog" target="_self">公告</a></li>
-						<li><a href="/help/rate" target="_self">费率</a></li>
-						<li><a href="/help/restApi" target="_self">API</a></li>
-						<li><a href="/app" target="_self">APP</a></li>
-						<li><a href="/about" target="_self">关于</a></li>
+						<li><a href="javascipr:;">{{$t('menu["上币申请"]')}}</a></li>
+						<li><a href="javascipr:;">{{$t('menu["帮助"]')}}</a></li>
+						<li><a href="./index#blog">{{$t('menu["公告"]')}}</a></li>
+						<li><a href="javascipr:;">{{$t('menu["费率"]')}}</a></li>
+						<li><a href="javascipr:;">{{$t('menu["api"]')}}</a></li>
+						<li><a href="javascipr:;">{{$t('menu["app"]')}}</a></li>
+						<li><a href="javascipr:;">{{$t('menu["关于"]')}}</a></li>
 					</ul>
 				</div>
 			</div>
 		</div>
 		<div class="h-box">
-			<div class='subscription' v-show='$store.state.user.isLogin'>
-				<a href="./index#subscription">认购</a>
+			<div class='subscription' v-show='$store.state.isLogin'>
+				<a href='./index#subscription' style='font-size:14px'>{{$t('menu["认购"]')}}</a>
 			</div>
-			<div class="finance-menu" v-show='$store.state.user.isLogin'>
-				<a href="./index#account">财务中心</a>
-				<div class="finance-menu-dropdown">
-					<div class="asset-drop" style="min-width: 400px;">
-						<div class="asset-drop-head" style="padding-bottom: 0px;">
-							<div class="onffflist"><a role="button" class=""><span>隐藏小额资产币种</span><i></i></a></div>
-							<div class="info">
-								<div class="num-info">
-									账户资产价值
-									<div class="drop">
-										<p>CNY</p>
-										<ul class="drop-box">
-											<li>USD</li>
-											<li class="active">CNY</li>
-										</ul>
-									</div>
-								</div>
-								<p class="num">0.000</p>
-							</div>
-						</div>
-						<div style="margin: 10px; display: flex; justify-content: flex-end;">
-							<div class="search-box"><input placeholder="搜索" type="text"> <i class="trading-icon trading-icon-search"></i></div>
-						</div>
-						<div class="asset-scrollbar" style="max-height: 288px; overflow: hidden; position: relative; touch-action: none;">
-							<div class="asset-drop-table" style="transition-timing-function: cubic-bezier(0.1, 0.57, 0.1, 1); transition-duration: 0ms; transform: translate(0px, 0px) translateZ(0px);">
-								<div class="tr head">
-									<div class="td">币种</div>
-									<div class="td">可用</div>
-									<div class="td">冻结</div>
-									<div class="td">操作</div>
-								</div>
-								<div class="tr">
-									<div class="td"><img src="/src/images/icon/market-icon/market-qtum.png?1522117874610" class="market-icon">QTUM</div>
-									<div class="td"><span aria-label="折合:0.0000 CNY" class="hint--top">0</span></div>
-									<div class="td"><span aria-label="折合:0.0000 CNY" class="hint--top">0</span></div>
-									<div class="td"><a role="button" href="/u/payin/qtum" target="_self">充值</a> <a role="button" href="/u/payout/qtum" target="_self">提币</a></div>
-								</div>
-							</div>
-							<div class="iScrollVerticalScrollbar iScrollLoneScrollbar" style="overflow: hidden; pointer-events: none;">
-								<div class="iScrollIndicator" style="transition-duration: 0ms; display: none; height: 8px; transform: translate(0px, -8px) translateZ(0px); transition-timing-function: cubic-bezier(0.1, 0.57, 0.1, 1);"></div>
-							</div>
-						</div>
-					</div>
-				</div>
+			<div class="subscription" v-show='$store.state.isLogin'>
+				<a href='./index#account' style='font-size:14px'>{{$t('menu["财务中心"]')}}</a>
 			</div>
 			
-			<div class="site-menu cart"  v-show='$store.state.user.isLogin'>
-				<p role="button">用户中心</p>
+			<div class="site-menu cart"  v-show='$store.state.isLogin'>
+				<p role="button"><a to='./index#user/number' style='font-size:14px'>{{$store.state.user.nickName}}</a></p>
 				<div class="site-menu-dropdown">
 					<ul>
-						<li><a href='javascript:void(null)' @click='logout'>退出登录</a></li>
+						<li v-for='item in $store.state.userAccount' @click='changLogin(item.id)'><a href='javascript:void(null)'>{{item.nickName}}</a></li>
+						<li><a href='javascript:void(null)' @click='logout' style='font-size:14px'>{{$t('menu["退出登录"]')}}</a></li>
 					</ul>
 				</div>
 			</div>
-			<div class="user-menu" v-show='!$store.state.user.isLogin'>
-				<a herf="./index#login" class="flex flex-tb-center menu-head ">登录</a>
-				<a herf="./index#login" class="flex flex-tb-center menu-head ">注册</a>
-			</div>
+			<div class="user-menu" v-show='!$store.state.isLogin'>
+			<a href="./index#login" class="flex flex-tb-center menu-head" style='font-size:14px'>{{$t('menu["登录"]')}}</a>
+			<a href="./index#register" class="flex flex-tb-center menu-head" style='font-size:14px'>{{$t('menu["注册"]')}}</a></div>
 			<div class="language">
-				<p role="button"><img src="/src/images/guoqi/cn.svg">CN</p>
+				<p role="button" style='font-size:14px'>{{label}}</p>
 				<ul>
-					<li role="button" class="hk">HK</li>
-					<li role="button" class="en">EN</li>
-					<li role="button" class="jp">JP</li>
-					<li role="button" class="kr">KR</li>
+					<li role="button" @click='choose("cn")'>{{$t('menu["简体中文"]')}}</li>
+					<li role="button" @click='choose("en")'>{{$t('menu["英语"]')}}</li>
+					<li role="button" @click='choose("jp")'>{{$t('menu["日语"]')}}</li>
+					<li role="button" @click='choose("ko")'>{{$t('menu["韩语"]')}}</li>
+					<li role="button" @click='choose("zh_TW")'>{{$t('menu["繁体中文"]')}}</li>
 				</ul>
 			</div>
 			<div class="webchat-r">
@@ -111,16 +70,102 @@
 </header>
 </template>
 <script>
+	import Post from '@/api/post'
+	import Get from '@/api/get'
 	export default {
 		data() {
 			return {
-				show:true
+				fullscreenLoading: false,
+				current: true,
+				label: '',
+				language: [{
+					value: 'cn',
+					label: this.$t('menu["简体中文"]')
+				}, {
+					value: 'en',
+					label: this.$t('menu["英语"]')
+				}, {
+					value: 'jp',
+					label: this.$t('menu["日语"]')
+				}, {
+					value: 'ko',
+					label: this.$t('menu["韩语"]')
+				}, {
+					value: 'zh_TW',
+					label: this.$t('menu["繁体中文"]')
+				}]
 			}
 		},
-		created() {},
-		methods:{
-			logout(){
-				this.$store.state.user.isLogin = null;
+		created() {
+			this.label = this.language.filter(res => {
+				if (res.value == this.$i18n.locale) {
+					return true
+				}
+			})[0].label;
+		},
+		methods: {
+			changLogin(id) {
+				const loading = this.$loading({
+					lock: true,
+					text: 'Loading',
+					spinner: 'el-icon-loading',
+					background: 'rgba(0, 0, 0, 0.7)'
+				});
+				Post({
+					url: 'log/changLogin',
+					data: {
+						id: id
+					},
+					success: res => {
+						loading.close()
+						if (res.code == 0) {
+							this.init();
+						}
+					}
+				})
+			},
+
+			init() {
+				this.fullscreenLoading = true;
+				Post({
+					url: 'log/getSessionUser',
+					success: res => {
+						if (res.code === 0) {
+							this.$store.commit('SET_TYPEN', res.data);
+							this.fullscreenLoading = false;
+						}
+					}
+				});
+			},
+			choose(value, txt) {
+				this.$i18n.locale = value;
+				localStorage.setItem('lang', value);
+				if (value === 'cn') {
+					this.label = this.$t('menu["简体中文"]');
+				} else if (value === 'en') {
+					this.label = this.$t('menu["英语"]');
+				} else if (value === 'jp') {
+					this.label = this.$t('menu["日语"]');
+				} else if (value === 'ko') {
+					this.label = this.$t('menu["韩语"]');
+				} else {
+					this.label = this.$t('menu["繁体中文"]');
+				}
+			},
+			logout() {
+				Get({
+					url: 'log/logout',
+					success: res => {
+						this.$store.state.isLogin = null;
+						this.$store.state.user = {};
+						sessionStorage.setItem('isLogin', 'null');
+						this.$message({
+							message: '登出成功',
+							type: 'success'
+						});
+					}
+				})
+
 			}
 		}
 	}
@@ -134,12 +179,14 @@
 		padding: 6px;
 		position: relative
 	}
+	
 	.e-notice .el-icon-close {
 		position: absolute;
-		right:4px;
+		right: 4px;
 		top: 4px;
 		font-size: 14px;
 	}
+	
 	.header {
 		-webkit-box-flex: 0;
 		-ms-flex: none;
@@ -152,7 +199,7 @@
 	
 	.header .h-content {
 		position: relative;
-		background: #1f2126;
+		background-color: rgb(31, 33, 38);
 		display: -webkit-box;
 		display: -ms-flexbox;
 		display: flex;
@@ -162,6 +209,10 @@
 		-webkit-box-pack: justify;
 		-ms-flex-pack: justify;
 		justify-content: space-between;
+	}
+	
+	.header .flags {
+		background-color: rgba(31, 33, 38, .5);
 	}
 	
 	.home .header .h-content {
@@ -346,7 +397,7 @@
 		color: #888;
 		padding-left: 10px;
 		height: 42px;
-		font-size: 13px;
+		font-size: 14px;
 		width: 155px;
 		position: relative;
 		white-space: nowrap;
@@ -488,7 +539,6 @@
 	}
 	
 	.header .language p {
-		height: 50px;
 		display: -webkit-box;
 		display: -ms-flexbox;
 		display: flex;
@@ -547,6 +597,7 @@
 	}
 	
 	.header .language ul li {
+		width: 80px;
 		display: -webkit-box;
 		display: -ms-flexbox;
 		display: flex;
@@ -555,6 +606,7 @@
 		align-items: center;
 		padding: 10px;
 		color: #333;
+		justify-content: center
 	}
 	
 	.header .language ul li img {

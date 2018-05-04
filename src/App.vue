@@ -14,7 +14,6 @@
 
 <script>
 	import myHeader from '@/components/Header'
-	console.log(myHeader)
 	import myFooter from '@/components/Footer'
 	import myHome from '@/components/Home'
 	export default {
