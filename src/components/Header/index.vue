@@ -2,7 +2,7 @@
 <header id="user-nav" class="header">
 	<div class="e-notice" v-show='current'>
 		<a href="./index#blog" class="text" style='font-size:14px'>
-			{{!data.length ? '暂无内容！' : data[0].notice}}
+			{{!data.length ? $t(`other["暂无内容！"]`) : data[0].notice}}
 		</a>
 		<i class="el-icon-close" @click='current = false'></i>
 	</div>

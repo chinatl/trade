@@ -17,13 +17,13 @@
 			</dl>
 			<dl>
 				<dt>{{$t('footer["联系我们"]')}}</dt>
-				<dd><span>工作日工作时间：</span>{{concat.workingDay}}</dd>
-				<dd><span>节假日工作时间：</span>{{concat.restDay}}</dd>
-				<dd><span>联系QQ：</span>{{concat.qq}}</dd>
-				<dd><span>联系电话：</span>{{concat.phone}}</dd>
-				<dd><span>联系微博：</span>{{concat.microBlog}}</dd>
-				<dd><span>qq群：</span>{{concat.qqGroup}}</dd>
-				<dd><span>联系微信：</span>{{concat.wechat}}</dd>
+				<dd><span>{{$t('other["工作日工作时间"]')}}：</span>{{concat.workingDay}}</dd>
+				<dd><span>{{$t('other["节假日工作时间"]')}}：</span>{{concat.restDay}}</dd>
+				<dd><span>{{$t('other["联系QQ"]')}}：</span>{{concat.qq}}</dd>
+				<dd><span>{{$t('other["联系电话"]')}}：</span>{{concat.phone}}</dd>
+				<dd><span>{{$t('other["联系微博"]')}}：</span>{{concat.microBlog}}</dd>
+				<dd><span>{{$t('other["QQ群"]')}}：</span>{{concat.qqGroup}}</dd>
+				<dd><span>{{$t('other["联系微信"]')}}：</span>{{concat.wechat}}</dd>
 			</dl>
 		</div>
 		<div class="copyright">

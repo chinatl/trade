@@ -1,9 +1,8 @@
 <template>
 <div class="section" v-loading='loading'>
 	<div id="app-sider" class="trading-slider">
-		
         <div class="trading-filter">
-            <div class="search"><i class="trading-icon trading-icon-search"></i> <input placeholder="搜索" type="text" v-model='son_value' @keyup='change_son_value'></div>
+            <div class="search"><i class="trading-icon trading-icon-search"></i> <input :placeholder="$t(`other['搜索']`)" type="text" v-model='son_value' @keyup='change_son_value'></div>
 <!--
             <div class="drop">
                 <p>价格显示:<span>USD</span></p>
@@ -26,7 +25,7 @@
 					</li>
 					<li role="button" :class=" father_current == 100 ? 'active' : ''" @click='check_father("我的")'>
 						<i class="el-icon-star-on" style='font-size:16px'></i>
-						<p>自选</p>
+						<p>{{$t('other["自选"]')}}</p>
 					</li>
 				</ul>
 			</div>
@@ -124,7 +123,7 @@
 					<!---->
 				</ul>
 				<div class="operation">
-					<a role="button" class="switch">价格输入转换<el-switch v-model="show_price" style='margin-left:10px' @change='shuruzhuanhuan'></el-switch></a>
+					<a role="button" class="switch">{{$t('other["价格输入转换"]')}}<el-switch v-model="show_price" style='margin-left:10px' @change='shuruzhuanhuan'></el-switch></a>
 
 					<!---->
 				</div>
@@ -138,7 +137,8 @@
 					<h2>买入{{son_ket.vName}}</h2>
 					<p class="form-assets">
 						{{$t(`ranking['可用']`)}}{{fa_ket.vName}}：<span aria-label="可买：-- QTUM" class="trading-redcolor hint--top">{{buy_form.money * yaochengdeshu}}</span>
-						<span style="margin-left:20px"></span>冻结{{fa_ket.vName}}：<span aria-label="可买：-- QTUM" class="trading-redcolor hint--top">{{buy_form.frozenTotal * yaochengdeshu}}</span>
+						<span style="margin-left:20px"></span>{{$t('other["冻结"]')}}{{fa_ket.vName}}：<span aria-label="可买：-- QTUM" class="trading-redcolor hint--top">{{buy_form.frozenTotal * yaochengdeshu}}</span>
+
 						<!---->
 						<!---->
 					</p>
@@ -175,7 +175,7 @@
 					<h2>{{$t(`ranking['卖出']`)}}{{son_ket.vName}}</h2>
 					<p class="form-assets">
 						{{$t(`ranking['可用']`)}}{{son_ket.vName}}：<span aria-label="可卖：-- BTC" class="trading-greencolor hint--top">{{sell_form.money * yaochengdeshu}}</span>
-						<span style="margin-left:20px"></span>冻结{{son_ket.vName}}：<span aria-label="可卖：-- BTC" class="trading-greencolor hint--top">{{sell_form.frozenTotal * yaochengdeshu}}</span>
+						<span style="margin-left:20px"></span>{{$t('other["冻结"]')}}{{son_ket.vName}}：<span aria-label="可卖：-- BTC" class="trading-greencolor hint--top">{{sell_form.frozenTotal * yaochengdeshu}}</span>
 					</p>
 					<div class="form-group">
 						<div class="form-control">
@@ -222,11 +222,11 @@
 					<ul style="transition-timing-function: cubic-bezier(0.1, 0.57, 0.1, 1); transition-duration: 500ms; <!--transform: translate(0px, -952px) translateZ(0px);-->">
 						<li role="button" v-for='(item,index) in buyData' @click='set_sellform(item)'>
 							<p class="stall trading-greencolor" v-html="$t(`ranking['卖']`) +((buyData.length < 6) ? (buyData.length - index) : 6 - index) ">
-<!--								{{$t(`ranking['卖']`)}} {{ (buyData.length < 6) ? buyData.length : 6 - index }} </p>-->
-							<p class="trading-greencolor">{{item. prize.toFixed(sixnumber)}}</p>
-							<p>{{item.leftAmount.toFixed(sixnumber)}}</p>
-							<p class="last">{{(item.prize * item.leftAmount).toFixed(sixnumber)}}</p>
-							<p class="progress" :style="{width:item.entrustType + '%'}"></p>
+								<!--								{{$t(`ranking['卖']`)}} {{ (buyData.length < 6) ? buyData.length : 6 - index }} </p>-->
+								<p class="trading-greencolor">{{item. prize.toFixed(sixnumber)}}</p>
+								<p>{{item.leftAmount.toFixed(sixnumber)}}</p>
+								<p class="last">{{(item.prize * item.leftAmount).toFixed(sixnumber)}}</p>
+								<p class="progress" :style="{width:item.entrustType + '%'}"></p>
 						</li>
 					</ul>
 					<div class="iScrollVerticalScrollbar iScrollLoneScrollbar" style="overflow: hidden; pointer-events: none;">
@@ -279,7 +279,7 @@
                                     <span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">{{ scope.row.lastUpdateTime  | parseTime('{y}-{m}-{d} {h}:{i}:{s}')}}</span>
                                   </template>
 								</el-table-column>
-								<el-table-column prop="name" :label="'委托价/成交均价'+'('+fa_ket.vName +')'" align='center' width='190'>
+								<el-table-column prop="name" :label="$t(`other['委托价/成交均价']`)+'('+fa_ket.vName +')'" align='center' width='190'>
 									<template slot-scope="scope">
                                     <span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">
                                     	{{ scope.row.prize.toFixed(sixnumber) +'/' + scope.row.averagePrize.toFixed(sixnumber)}}
@@ -294,7 +294,7 @@
                                   </template>
 								</el-table-column>
 -->
-								<el-table-column prop="name" :label="'总数量/未成交数'+'('+son_ket.vName +')'" align='cneter' width='180'>
+								<el-table-column prop="name" :label="$t(`other['总数量/未成交数']`)+'('+son_ket.vName +')'" align='cneter' width='180'>
 									<template slot-scope="scope">
                                     <span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">
                                     	{{ scope.row.amount.toFixed(sixnumber) +'/' +scope.row.leftAmount .toFixed(sixnumber) }}
@@ -308,7 +308,8 @@
                                   </template>
 								</el-table-column>
 -->
-								<el-table-column :label="'折算金额'+'('+fa_ket.vName +')'" align='center'>
+
+								<el-table-column :label="$t(`other['折算金额']`)+'('+fa_ket.vName +')'" align='center'>
 									<template slot-scope="scope">
                                     <span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">{{ scope.row.poolCount && scope.row.poolCount.toFixed(sixnumber) }}</span>
                                   </template>
@@ -342,7 +343,8 @@
                                     <span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">{{ scope.row.lastUpdateTime  | parseTime('{y}-{m}-{d} {h}:{i}:{s}')}}</span>
                                   </template>
 								</el-table-column>
-								<el-table-column prop="name" :label="'委托价/成交均价'+'('+fa_ket.vName +')'" align='center' width='190'>
+
+								<el-table-column prop="name" :label="$t(`other['委托价/成交均价']`)+'('+fa_ket.vName +')'" align='center' width='190'>
 									<template slot-scope="scope">
                                     <span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">
                                     	{{ scope.row.prize.toFixed(sixnumber) +'/' + scope.row.averagePrize.toFixed(sixnumber)}}
@@ -357,7 +359,7 @@
                                   </template>
 								</el-table-column>
 -->
-								<el-table-column prop="name" :label="'总数量/未成交数'+'('+son_ket.vName +')'" align='cneter' width='180'>
+								<el-table-column prop="name" :label="$t(`other['总数量/未成交数']`)+'('+son_ket.vName +')'" align='cneter' width='180'>
 									<template slot-scope="scope">
                                     <span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">
                                     	{{ scope.row.amount.toFixed(sixnumber) +'/' + scope.row.leftAmount .toFixed(sixnumber) }}
@@ -371,12 +373,12 @@
                                   </template>
 								</el-table-column>
 -->
-								<el-table-column :label="'折算金额'+'('+fa_ket.vName +')'" align='center'>
+								<el-table-column :label="$t(`other['折算金额']`)+'('+fa_ket.vName +')'" align='center'>
 									<template slot-scope="scope">
                                     <span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">{{ scope.row.poolCount && scope.row.poolCount.toFixed(sixnumber) }}</span>
                                   </template>
 								</el-table-column>
-								<el-table-column prop="address" label="类型" align='center'>
+								<el-table-column prop="address" :label="$t(`other['类型']`)" align='center'>
 									<template slot-scope="scope">
                                     <span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">{{ scope.row.entrustType ? $t(`ranking['卖出']`) : $t(`ranking['买入']`) }}</span>
                                   </template>
@@ -417,7 +419,7 @@
 					</el-table-column>
 				</el-table>
 			</div>
-			<div class="newest-top">币种介绍</div>
+			<div class="newest-top">{{$t('other["币种介绍"]')}}</div>
 			<div class="newest-top" style="line-height:1.5;text-indent:2em">{{son_ket.kidsDescription}}</div>
 		</div>
 	</div>
@@ -769,7 +771,9 @@
 									type: 'success',
 									duration: 3000
 								});
-								this.selPool(this.son_ket.vName + '_' + this.fa_ket.vName);
+								var obj = {};
+								obj.vName = this.son_ket.vName + '_' + this.fa_ket.vName;
+								this.selPool(obj.vName);
 								this.get_nvz_api(this.son_ket.vName + '_' + this.fa_ket.vName);
 							} else {
 								this.$message({
@@ -1350,6 +1354,11 @@
 						if (res.code === 0) {
 							if (res.data === 1) {
 								this.get_nvz_api(this.son_ket.vName + '_' + this.fa_ket.vName);
+								if (this.son_ket.vName && this.fa_ket.vName) {
+									var obj = {};
+									obj.vName = this.son_ket.vName + '_' + this.fa_ket.vName;
+									this.selPool(obj.vName);
+								}
 							}
 						}
 					}
@@ -1358,6 +1367,11 @@
 			setInterval(res => {
 				this.get_deep_data(this.son_ket.vName + '_' + this.fa_ket.vName);
 				this.get_nvz_api(this.son_ket.vName + '_' + this.fa_ket.vName);
+				if (this.son_ket.vName && this.fa_ket.vName) {
+					var obj = {};
+					obj.vName = this.son_ket.vName + '_' + this.fa_ket.vName;
+					this.selPool(obj.vName);
+				}
 			}, 5000)
 			this.kline = new Kline({
 				element: "#chart-box-body",
