@@ -14,6 +14,5 @@ export default obj => {
 		}).catch(res => {
 			console.log(res)
 			obj.fail && obj.fail(res.body)
-			Message.error('网页延迟');
 		})
 }

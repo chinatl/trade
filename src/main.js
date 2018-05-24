@@ -16,59 +16,58 @@ import 'element-ui/lib/theme-chalk/index.css';
 Vue.use(ElementUI);
 /**/
 Vue.config.productionTip = false
-Post({
-    url: 'log/login',
-    data: {
-        userName: 15719289905,
-        password: '96e79218965eb72c92a549dd5a330112',
-        isLogin: 'login',
-    },
-    success: res => {
-        console.log(res)
-    }
+//Post({
+//    url: 'log/login',
+//    data: {
+//        userName: 15719289905,
+//        password: '96e79218965eb72c92a549dd5a330112',
+//        isLogin: 'login',
+//    },
+//    success: res => {
+//    }
+//
+//})
 
-})
 Post({
-    url: 'log/getSessionUser',
-    success: res => {
-        if (res.code === 0) {
-            store.state.isLogin = true;
-            store.state.user.mainUsersId = res.data.mainUsersId + '';
-            store.state.user = res.data;
-            if (res.data.mainUsersId + '' === 'null') {
-                Post({
-                    url: 'log/getKidUsers',
-                    success: res => {
-                        if (res.code === 0) {
-                            store.state.userAccount = res.data;
-                        }
-                    }
-                })
-            } else {
-                store.state.userAccount = [];
-            }
-        }
-    }
+	url: 'log/getSessionUser',
+	success: res => {
+		if (res.code === 0) {
+			store.state.isLogin = true;
+			store.state.user.mainUsersId = res.data.mainUsersId + '';
+			store.state.user = res.data;
+			if (res.data.mainUsersId + '' === 'null') {
+				Post({
+					url: 'log/getKidUsers',
+					success: res => {
+						if (res.code === 0) {
+							store.state.userAccount = res.data;
+						}
+					}
+				})
+			} else {
+				store.state.userAccount = [];
+			}
+		} else {
+			store.state.isLogin = false;
+		}
+	}
 })
 
 import * as filters from './filters' // 全局filter
 Object.keys(filters).forEach(key => {
-    Vue.filter(key, filters[key])
+	Vue.filter(key, filters[key])
 })
 
 import kline_api from './config'
-var socket = new SockJS(kline_api + "webSocketServer");
-// 获取 STOMP 子协议的客户端对象
-var stompClient = Stomp.over(socket);
-Vue.prototype.$sock = stompClient;
+
 
 /* eslint-disable no-new */
 new Vue({
-    el: '#app',
-    store,
-    i18n,
-    components: {
-        App
-    },
-    template: '<App/>'
+	el: '#app',
+	store,
+	i18n,
+	components: {
+		App
+	},
+	template: '<App/>'
 })

@@ -1028,7 +1028,7 @@ button {
 	flex: 1;
 	position: relative;
 	z-index: 3;
-	padding: 5px 0;
+	padding: 4px 0;
 }
 
 .disc-list ul li p.last {
@@ -1081,7 +1081,7 @@ button {
 .current-entrust {
 	background: #fff;
 	margin-bottom: 1px;
-	min-height: 300px;
+/*	min-height: 300px;*/
 }
 
 .history-entrust {

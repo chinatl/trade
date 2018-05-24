@@ -1,20 +1,34 @@
 <template>
 <header id="user-nav" class="header">
 	<div class="e-notice" v-show='current'>
-		<a href="./index#blog" class="text" style='font-size:14px'>{{$t('menu["提示"]')}}</a>
+		<a href="./index#blog" class="text" style='font-size:14px'>
+			{{!data.length ? '暂无内容！' : data[0].notice}}
+		</a>
 		<i class="el-icon-close" @click='current = false'></i>
 	</div>
 	<div class="h-content">
 		<div class="h-box">
 			<div class="subscription">
-				<a href='./index' style='font-size:14px'>{{$t('menu["主页"]')}}</a>
+				<a href='./index' style='font-size:14px'>
+					{{$t('menu["主页"]')}}
+<!--					<img :src="require('@/assets/xlogo.png')" alt="" style='height:50px;'>-->
+				</a>
 			</div>
 			<div class="subscription flags " style="margin-left: 20px;">
 				<a href="javacript:;" style='font-size:14px;color:#ff9d11'>{{$t('menu["专业交易"]')}}</a>
 			</div>
 			<div class="subscription" style="margin-left: 20px;">
-				<p role="button"><a href='./index#ranking' style='font-size:14px'>{{$t('menu["交易排行榜"]')}}</a></p>
+				<p role="button"><a href='./index#ranking' style='font-size:14px'>
+					{{$t('menu["交易排行榜"]')}}
+				</a></p>
 			</div>
+<!--
+			<div class="subscription" style="margin-left: 20px;">
+				<p role="button"><a href='./index#tender/buy' style='font-size:14px'>
+					{{$t('account["法币交易"]')}}
+				</a></p>
+			</div>
+-->
 			<div class="site-menu cart">
 				<p role="button">{{$t('menu["网站导航"]')}}</p>
 				<div class="site-menu-dropdown">
@@ -93,10 +107,22 @@
 				}, {
 					value: 'zh_TW',
 					label: this.$t('menu["繁体中文"]')
-				}]
+				}],
+				data:[]
 			}
 		},
 		created() {
+			Get({
+				url: 'notice/findAll',
+				success: res => {
+					if (res.code === 0) {
+						this.data = res.data;
+					} 
+				},
+				fail: res => {
+					this.loading = false;
+				}
+			})
 			this.label = this.language.filter(res => {
 				if (res.value == this.$i18n.locale) {
 					return true
