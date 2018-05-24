@@ -10,10 +10,10 @@ export default obj => {
 		.then(function (res) {
 			obj.success && obj.success(res.body)
 		}).catch(res => {
-			Message.error({
-				title: '错误',
-				message: '网络延迟'
-			});
+//			Message.error({
+//				title: '错误',
+//				message: '网络延迟'
+//			});
 			obj.fail && obj.fail(res.body)
 		})
 }
