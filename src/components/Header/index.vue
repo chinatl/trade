@@ -146,6 +146,7 @@
 						loading.close()
 						if (res.code == 0) {
 							this.init();
+							window.document.location.reload();
 						}
 					}
 				})

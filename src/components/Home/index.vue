@@ -5,7 +5,7 @@
             <div class="search"><i class="trading-icon trading-icon-search"></i> <input :placeholder="$t(`other['搜索']`)" type="text" v-model='son_value' @keyup='change_son_value'></div>
 <!--
             <div class="drop">
-                <p>价格显示:<span>USD</span></p>
+                <p>单价显示:<span>USD</span></p>
                 <ul class="drop-box">
                     <li class="active">USD</li>
                     <li class="">CNY</li>
@@ -47,8 +47,8 @@
 </el-table-column>
 <el-table-column :label="$t(`ranking['最新价']`)+fa_ket.vName" sortable prop='newprice' width='120'>
 	<template slot-scope="scope">
-								<span v-show='!show_price' :style="{color: scope.row.roseFall < 0 ? '#30c296':'#fd315b'}">{{scope.row.latestPrize}}</span>
-								<span v-show='show_price' :style="{color: scope.row.roseFall < 0 ? '#30c296':'#fd315b'}">{{scope.row.cardinal1_3}}</span>
+								<span v-show='!show_price' :style="{color: scope.row.roseFall < 0 ? '#30c296':'#fd315b'}">{{scope.row.latestPrize | filter_num}}</span>
+								<span v-show='show_price' :style="{color: scope.row.roseFall < 0 ? '#30c296':'#fd315b'}">{{scope.row.cardinal1_3 | filter_num}}</span>
 						</template>
 </el-table-column>
 <el-table-column align="center" :label="$t(`ranking['涨跌幅']`)" sortable>
@@ -67,16 +67,23 @@
 		<div class="l-area">
 			<div class="current-price">
 				<div class="coin-icon"><img :src="son_img" alt="" style='width:20px;vertical-align:top;margin-right:10px'></div>
-				<h2>{{ son_ket.vName }} / <span>{{fa_ket.vName}}</span> <span :class=" tradeMarketPrize.roseFall < 0 ? 'text-second trading-greencolor': 'text-second trading-redcolor'">{{NewPrize.toFixed(sixnumber)}}</span></h2>
+				<h2>{{ son_ket.vName }} / <span>{{fa_ket.vName}}</span> <span :class=" tradeMarketPrize.roseFall < 0 ? 'text-second trading-greencolor': 'text-second trading-redcolor'">{{NewPrize.toFixed(sixnumber)}} {{fa_ket.vName}}</span></h2>
 				<p>≈ {{ NewCount.toFixed(sixnumber)}}CNY</p>
 			</div>
 			<div class="num">24H{{$t(`ranking['涨跌幅']`)}}<br>
-				<span :class=" tradeMarketPrize.roseFall < 0 ? 'text-second trading-greencolor': 'text-second trading-redcolor'">{{tradeMarketPrize.roseFall && tradeMarketPrize.roseFall.toFixed(sixnumber)}}</span>
+				<span :class=" tradeMarketPrize.roseFall < 0 ? 'text-second trading-greencolor': 'text-second trading-redcolor'">
+					{{tradeMarketPrize.roseFall > 0 ? "+": null}}
+					{{tradeMarketPrize.roseFall && tradeMarketPrize.roseFall.toFixed(sixnumber)}}%
+				</span>
 			</div>
-			<div class="num">24H{{$t(`ranking['最高价']`)}}<br><span aria-label="折合:16.977 USD" class="trading-redcolor hint--bottom">{{tradeMarketPrize.maxprize}}</span></div>
-			<div class="num">24H{{$t(`ranking['最低价']`)}}<br><span aria-label="折合:15.309 USD" class="trading-greencolor hint--bottom">{{tradeMarketPrize.minprize}}</span></div>
+			<div class="num">24H{{$t(`ranking['最高价']`)}}<br>
+				<span aria-label="折合:16.977 USD" class="trading-redcolor hint--bottom">{{tradeMarketPrize.maxprize | filter_num}} {{fa_ket.vName}}</span>
+			</div>
+			<div class="num">24H{{$t(`ranking['最低价']`)}}<br>
+				<span aria-label="折合:15.309 USD" class="trading-greencolor hint--bottom">{{tradeMarketPrize.minprize | filter_num}} {{fa_ket.vName}}</span>
+			</div>
 			<div class="num">24H{{$t(`ranking['总价']`)}}<br><span class="trading-darkcolor">
-            {{tradeMarketPrize.sumprize && tradeMarketPrize.sumprize.toFixed(sixnumber) }}{{son_ket.vName}}</span></div>
+            {{tradeMarketPrize.sumprize && tradeMarketPrize.sumprize.toFixed(sixnumber) }} {{son_ket.vName}}</span></div>
 		</div>
 		<div class="r-area"><a role="button" onclick="$('.trading-chart').toggle()" style="margin-right: 15px;">{{$t(`ranking['收起/展开K线']`)}}</a></div>
 	</div>
@@ -95,7 +102,7 @@
 					</div>
 					<div class="r-area">
 						<div class="item arrow">
-							<!--                            <p>价格显示：<span>CNY</span></p>-->
+							<!--                            <p>单价显示：<span>CNY</span></p>-->
 							<!--
                             <ul class="item-list">
                                 <li role="button">默认</li>
@@ -136,8 +143,9 @@
 				<div class="box trading-buy" v-loading='buy_loading'>
 					<h2>买入{{son_ket.vName}}</h2>
 					<p class="form-assets">
-						{{$t(`ranking['可用']`)}}{{fa_ket.vName}}：<span aria-label="可买：-- QTUM" class="trading-redcolor hint--top">{{buy_form.money * yaochengdeshu}}</span>
-						<span style="margin-left:20px"></span>{{$t('other["冻结"]')}}{{fa_ket.vName}}：<span aria-label="可买：-- QTUM" class="trading-redcolor hint--top">{{buy_form.frozenTotal * yaochengdeshu}}</span>
+						{{$t(`ranking['可用']`)}}{{fa_ket.vName}}：<span aria-label="可买：-- QTUM" class="trading-redcolor hint--top">
+						{{$store.state.isLogin ? ( buy_form.money || '0') : '--'}}</span>
+						<span style="margin-left:20px"></span>{{$t('other["冻结"]')}}{{fa_ket.vName}}：<span aria-label="可买：-- QTUM" class="trading-redcolor hint--top">{{$store.state.isLogin ? (buy_form.frozenTotal || '0') : '--'}}</span>
 
 						<!---->
 						<!---->
@@ -148,10 +156,10 @@
 					<div class="form-group">
 						<div class="form-control">
 							<input v-model='buy_form.price' class="buyColor" @change='check_buy_price' @keyup='check_buy_price' :disabled='!$store.state.isLogin'>
-							<label>{{$t(`ranking['买入价']`)}}{{son_ket.vName}}{{$t(`ranking['单价']`)}}({{$t(`ranking['单位']`)}}{{show_price ? 'CNY' : fa_ket.vName }} )&nbsp;&nbsp;&nbsp;&nbsp;  {{$t(`ranking['最小值']`)}}： {{buy_form.minBuyPrize}}--
-                            {{$t(`ranking['最大值']`)}}{{buy_form.maxBuyPrize}}</label>
+							<label>{{$t(`ranking['买入价']`)}}{{son_ket.vName}}{{$t(`ranking['单价']`)}}({{$t(`ranking['单位']`)}}{{show_price ? 'CNY' : fa_ket.vName }} )&nbsp;&nbsp;&nbsp;&nbsp;  {{$t(`ranking['最小值']`)}}： {{buy_form.minBuyPrize | filter_num}}--
+                            {{$t(`ranking['最大值']`)}}{{buy_form.maxBuyPrize | filter_num}}</label>
 							<!---->
-							<span style="margin-right:20px">≈<b class="sellColor">{{ !show_price ? buy_form.price / cardinal1_3 : buy_form.price * cardinal1_3 }}</b> {{!show_price ? 'CNY' : fa_ket.vName }} </span>
+							<span style="margin-right:20px">≈<b class="sellColor">{{ show_price ? ((buy_form.price / cardinal1_3) && (buy_form.price / cardinal1_3).toFixed(sixnumber)) : ((buy_form.price * cardinal1_3) && (buy_form.price * cardinal1_3).toFixed(sixnumber))}}</b> {{!show_price ? 'CNY' : fa_ket.vName }} </span>
 						</div>
 					</div>
 					<!---->
@@ -160,12 +168,12 @@
 						<div class="bk-trans-form">
 						</div>
 					</div>
-					<p class="form-assets">{{$t(`ranking['预计交易额']`)}}：{{ (buy_form.price * buy_form.number).toFixed(sixnumber) || '0'}}{{fa_ket.vName}}
+					<p class="form-assets">{{$t(`ranking['预计交易额']`)}}： {{ show_price ? ((buy_form.price * buy_form.number ).toFixed(sixnumber) || '0'): ((buy_form.price * buy_form.number).toFixed(sixnumber) || '0')}} {{show_price ? "CNY": fa_ket.vName}}
 					</p>
-					<p style="width:92%;position:relative">
+					<p style="width:90%;position:relative">
 						<el-slider v-model='buy_form.silder' @change='buy_slider' :step="25" show-stops>
 						</el-slider>
-						<span class="slider-number">{{buy_form.silder}}</span>
+						<span class="slider-number">{{buy_form.silder}}%</span>
 					</p>
 
 					<div class="form-button"><button type="button" role="button" class="trading-redbg disabled" v-if='!$store.state.isLogin'><a href='./index#login'>{{$t(`ranking['登录/注册']`)}}</a></button></div>
@@ -174,14 +182,15 @@
 				<div class="box trading-sell" v-loading='sell_loading'>
 					<h2>{{$t(`ranking['卖出']`)}}{{son_ket.vName}}</h2>
 					<p class="form-assets">
-						{{$t(`ranking['可用']`)}}{{son_ket.vName}}：<span aria-label="可卖：-- BTC" class="trading-greencolor hint--top">{{sell_form.money * yaochengdeshu}}</span>
-						<span style="margin-left:20px"></span>{{$t('other["冻结"]')}}{{son_ket.vName}}：<span aria-label="可卖：-- BTC" class="trading-greencolor hint--top">{{sell_form.frozenTotal * yaochengdeshu}}</span>
+						{{$t(`ranking['可用']`)}}{{son_ket.vName}}：<span aria-label="可卖：-- BTC" class="trading-greencolor hint--top">
+						{{ $store.state.isLogin ? (sell_form.money || '0') : '--' }}</span>
+						<span style="margin-left:20px"></span>{{$t('other["冻结"]')}}{{son_ket.vName}}：<span aria-label="可卖：-- BTC" class="trading-greencolor hint--top">{{$store.state.isLogin ? (sell_form.frozenTotal || '0') : '--'}}</span>
 					</p>
 					<div class="form-group">
 						<div class="form-control">
 							<input v-model='sell_form.price' @change='check_sell_price' @keyup='check_sell_price' class="sellColor" :disabled='!$store.state.isLogin'><label>{{$t(`ranking['卖出价']`)}}{{son_ket.vName}}{{$t(`ranking['单价']`)}}({{$t(`ranking['单位']`)}}{{show_price ? 'CNY' : fa_ket.vName }})&nbsp;&nbsp;&nbsp;&nbsp; {{$t(`ranking['最小值']`)}}： {{sell_form.minSellPrize}}--
                             {{$t(`ranking['最大值']`)}}{{sell_form.maxSellPrize}}</label>
-							<span style="margin-right:20px">≈<b class="sellColor">{{ !show_price ? sell_form.price / cardinal1_3 : sell_form.price * cardinal1_3 }}</b> {{!show_price ? 'CNY' : fa_ket.vName }} </span>
+							<span style="margin-right:20px">≈<b class="sellColor">{{ show_price ? ((sell_form.price / cardinal1_3) && (sell_form.price / cardinal1_3).toFixed(sixnumber)) : (sell_form.price * cardinal1_3) && ((sell_form.price * cardinal1_3).toFixed(sixnumber)) }}</b> {{!show_price ? 'CNY' : fa_ket.vName }} </span>
 						</div>
 					</div>
 
@@ -193,13 +202,13 @@
 						<div class="bk-trans-form">
 						</div>
 					</div>
-					<p class="form-assets">{{$t(`ranking['预计交易额']`)}}：{{(sell_form.price * sell_form.number).toFixed(sixnumber) || '0'}}{{fa_ket.vName}}
+					<p class="form-assets">{{$t(`ranking['预计交易额']`)}}： {{ show_price ? ((sell_form.price * sell_form.number ).toFixed(sixnumber) || '0') : ((sell_form.price * sell_form.number).toFixed(sixnumber) || '0')}} {{show_price ? "CNY" :fa_ket.vName}}
 						<!--                    <span class="trading-greencolor hint--top-left" aria-label="折合:17287.410 USD">2.17602515</span> {{fa_ket.vName}}-->
 					</p>
-					<p style="width:92%;position:relative">
+					<p style="width:90%;position:relative">
 						<el-slider v-model='sell_form.silder' @change='sell_slider' :step="25" show-stops>
 						</el-slider>
-						<span class="slider-number">{{sell_form.silder}}</span>
+						<span class="slider-number">{{sell_form.silder}}%</span>
 					</p>
 					<!---->
 					<div class="form-button">
@@ -214,7 +223,7 @@
 			<div class="disc-head">
 				<p class="stall"><span>{{$t(`ranking['档位']`)}}</span></p>
 				<p><span>{{$t(`ranking['单价']`)}}({{fa_ket.vName}})</span></p>
-				<p><span>{{$t(`ranking['总数量']`)}}({{son_ket.vName}})</span></p>
+				<p><span>{{$t(`ranking['总数量']`)}}({{son_ket.vName | filter_num}})</span></p>
 				<p class="last"><span>{{$t(`ranking['折价']`)}}({{fa_ket.vName}})</span></p>
 			</div>
 			<div class="disc-list" v-loading='buy_data_loading'>
@@ -267,6 +276,8 @@
 			<div class="current-entrust">
 				<div class="entrust-head">
 					<h3>{{$t(`ranking['正在进行的委托']`)}}</h3>
+					<span style="float:left" class="more_weituo" v-show='$store.state.isLogin'><a :href="'./index#account/log?'+son_ket.vName + '_'+fa_ket.vName"><span style="color:#ff9d11">更多委托...</span></a>
+					</span>
 					<!---->
 				</div>
 				<div class="record-list">
@@ -399,19 +410,24 @@
 				<el-table :data="newData" fit highlight-current-row style="width: 100%;margin-top:20px" v-loading='new_loading'>
 					<el-table-column align="center" :label="$t(`ranking['时间']`)" width='180'>
 						<template slot-scope="scope">
-							<span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">{{scope.row.lastUpdateTime | parseTime('{y}-{m}-{d} {h}:{i}:{s}')}}</span>
+							<span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">{{scope.row.lastUpdateTime | parseTime('{h}:{i}:{s}')}}</span>
 						</template>
 					</el-table-column>
-					<el-table-column align="center" :label="$t(`ranking['均价']`) +fa_ket.vName">
+					<el-table-column align="center" :label="$t(`ranking['单价']`) +fa_ket.vName" width='150'>
 						<template slot-scope="scope">
-							<span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">{{scope.row.averagePrize.toFixed(sixnumber)}}</span>
+							<span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">
+							{{scope.row.prize && scope.row.prize.toFixed(sixnumber)}} 
+<!--							{{scope.row.averagePrize && scope.row.averagePrize.toFixed(sixnumber)}}-->
+							</span>
 						</template>
 					</el-table-column>
+					<!--
 					<el-table-column align="center" :label="$t(`ranking['折价']`) + fa_ket.vName">
 						<template slot-scope="scope">
 							<span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">{{(scope.row.prize * scope.row.amount).toFixed(sixnumber)}}</span>
 						</template>
 					</el-table-column>
+-->
 					<el-table-column align="center" :label="$t(`ranking['交易量']`) + son_ket.vName">
 						<template slot-scope="scope">
 							<span :style="{color: scope.row.entrustType ? '#30c296':'#fd315b'}">{{scope.row.amount.toFixed(sixnumber)}}</span>
@@ -464,10 +480,10 @@
 				son_current: 0, //定义子市场是哪个
 				tradeMarketPrize: {
 					sumprize: "", //24h总价     
-					maxprize: "", //24h最大价格
-					minprize: "", //24h最小价格	
-					price: "", //24h最小价格	
-					priceQC: "", //24h最小价格	
+					maxprize: "", //24h最大单价
+					minprize: "", //24h最小单价	
+					price: "", //24h最小单价	
+					priceQC: "", //24h最小单价	
 				},
 				equal: 0, //比率
 				sixnumber: 6, //限制最小保留次数
@@ -493,6 +509,7 @@
 					silder: 0,
 					maxBuyPrize: '',
 					minBuyPrize: '',
+					cost: ''
 				},
 				sell_form: {
 					price: '',
@@ -501,6 +518,7 @@
 					silder: 0,
 					maxSellPrize: '',
 					minSellPrize: '',
+					cost: ''
 				},
 				historyData: [],
 				nowingData: [],
@@ -538,10 +556,24 @@
 		},
 		methods: {
 			shuruzhuanhuan(e) {
+				var number = this.cardinal1_3;
+				var buy_data = JSON.parse(JSON.stringify(this.buy_form));
 				if (e) {
 					this.yaochengdeshu = this.cardinal1_3;
+					if (this.buy_form.price) {
+						this.buy_form.price = this.buy_form.price * number;
+					}
+					if (this.sell_form.price) {
+						this.sell_form.price = this.sell_form.price * number;
+					}
 				} else {
 					this.yaochengdeshu = 1;
+					if (this.buy_form.price) {
+						this.buy_form.price = this.buy_form.price / number;
+					}
+					if (this.sell_form.price) {
+						this.sell_form.price = this.sell_form.price / number;
+					}
 				}
 			}, //输入转换
 			change_son_value(e) {
@@ -636,13 +668,8 @@
 					},
 					success: res => {
 						if (res.code === 0) {
-							if (res.data.asks === '') {
-								return
-							} else {
-								res.data.bids === ''
-							};
-							var asks = JSON.parse(res.data.asks);
-							var bids = JSON.parse(res.data.bids);
+							var asks = res.data.asks === '' ? [] : JSON.parse(res.data.asks);
+							var bids = res.data.bids === '' ? [] : JSON.parse(res.data.bids);
 							this.polar = {
 								tooltip: {
 									trigger: 'axis',
@@ -767,17 +794,18 @@
 							this.loading = false;
 							if (res.code === 0) {
 								this.$message({
-									message: '撤销成功',
+									message: res.data,
 									type: 'success',
 									duration: 3000
 								});
 								var obj = {};
 								obj.vName = this.son_ket.vName + '_' + this.fa_ket.vName;
-								this.selPool(obj.vName);
+								this.selPool(obj);
 								this.get_nvz_api(this.son_ket.vName + '_' + this.fa_ket.vName);
+								this.findUser(this.son_ket);
 							} else {
 								this.$message({
-									message: '撤销失败',
+									message: res.data,
 									type: 'error',
 									duration: 2000
 								});
@@ -795,11 +823,48 @@
 				});
 			},
 			buy_slider(e) {
-				this.buy_form.silder = e;
-				this.buy_form.number = (this.buy_form.money * e / 100).toFixed(this.sixnumber);
+				var number = 10 ** this.sixnumber;
+				if (this.buy_form.price == 0 || !this.buy_form.price) {
+					this.$message({
+						message: '请输入正确的单价',
+						type: 'warning',
+						duration: 2000
+					});
+					this.buy_form.silder = 0;
+					return
+				}
+				if (!this.show_price) {
+					if (this.buy_form.price) {
+						this.buy_form.number = Math.floor((this.buy_form.money * e / (1 + this.buy_form.cost) / 100 / this.buy_form.price * number)) / number;
+					}
+				} else {
+					if (this.buy_form.price) {
+						this.buy_form.number = Math.floor((this.cardinal1_3 * this.buy_form.money * e / (1 + this.buy_form.cost) / 100 / this.buy_form.price * number)) / number;
+					}
+
+				}
 			},
 			sell_slider(e) {
-				this.sell_form.number = (this.sell_form.money * e / 100).toFixed(this.sixnumber);
+				var number = 10 ** this.sixnumber;
+				if (this.sell_form.price == 0 || !this.sell_form.price) {
+					this.$message({
+						message: '请输入正确的单价',
+						type: 'warning',
+						duration: 2000
+					});
+					this.sell_form.silder = 0;
+					return
+				}
+				var num = this.sixnumber;
+				if (!this.show_price) {
+					if (this.sell_form.price) {
+						this.sell_form.number = Math.floor((this.sell_form.money * e / (1 + this.sell_form.cost) / 100) * 10 ** num) / 10 ** num
+					}
+				} else {
+					if (this.sell_form.price) {
+						this.sell_form.number = Math.floor((this.sell_form.money * e / (1 + this.sell_form.cost) / 100) * 10 ** num) / 10 ** num;
+					}
+				}
 			},
 			buy_bizhong() {
 				if (this.buy_form.price === '' || this.buy_form.number === '') {
@@ -810,18 +875,22 @@
 					});
 					return
 				}
-				this.$confirm('确定买入' + this.son_ket.vName + '单价' + this.buy_form.price + '，' + this.son_ket.vName + '数量' + this.buy_form.number + '，预计交易额' + (this.buy_form.price * this.buy_form.number).toFixed(this.sixnumber) + this.fa_ket.vName + '吗', '提示', {
+				var price = '';
+				var market_name = '';
+				if (this.show_price) {
+					price = this.buy_form.price;
+					market_name = '(CNY)'
+				} else {
+					price = this.buy_form.price;
+					market_name = '(' + this.fa_ket.vName + ')'
+				}
+				this.$confirm('确定买入' + this.son_ket.vName + '单价' + this.buy_form.price + market_name + '，' + this.son_ket.vName + '数量' + this.buy_form.number + '，预计交易额' + (price * this.buy_form.number).toFixed(this.sixnumber) + market_name + '吗', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
 					this.loading = true;
-					var price = '';
-					if (this.show_price) {
-						price = this.buy_form.price * this.cardinal1_3
-					} else {
-						price = this.buy_form.price;
-					}
+
 					Post({
 						url: 'pool/addBuyPool',
 						data: {
@@ -843,7 +912,9 @@
 								this.buy_form.price = '';
 								this.buy_form.number = '';
 								this.findUser(this.son_ket);
-								this.selPool(this.son_ket.vName + '_' + this.fa_ket.vName);
+								var obj = {};
+								obj.vName = this.son_ket.vName + '_' + this.fa_ket.vName;
+								this.selPool(obj.vName);
 								this.get_nvz_api(this.son_ket.vName + '_' + this.fa_ket.vName);
 							} else {
 								this.$message({
@@ -871,18 +942,21 @@
 					});
 					return
 				}
-				this.$confirm('确定卖出' + this.son_ket.vName + '单价' + this.sell_form.price + '，' + this.son_ket.vName + '数量' + this.sell_form.number + '，预计交易额' + (this.sell_form.price * this.sell_form.number).toFixed(this.sixnumber) + this.fa_ket.vName + '吗', '提示', {
+				var price = '';
+				var market_name = '';
+				if (this.show_price) {
+					price = this.sell_form.price;
+					market_name = '(CNY)'
+				} else {
+					price = this.sell_form.price;
+					market_name = '(' + this.fa_ket.vName + ')'
+				}
+				this.$confirm('确定卖出' + this.son_ket.vName + '单价' + this.sell_form.price + market_name + '' + '，' + this.son_ket.vName + '数量' + this.sell_form.number + '，预计交易额' + (price * this.sell_form.number).toFixed(this.sixnumber) + market_name + '吗', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
 					this.loading = true;
-					var price = '';
-					if (this.show_price) {
-						price = this.sell_form.price * this.cardinal1_3
-					} else {
-						price = this.sell_form.price;
-					}
 					Post({
 						url: 'pool/addSellPool',
 						data: {
@@ -904,7 +978,9 @@
 								this.findUser(this.son_ket);
 								this.sell_form.price = '';
 								this.sell_form.number = '';
-								this.selPool(this.son_ket.vName + '_' + this.fa_ket.vName);
+								var obj = {};
+								obj.vName = this.son_ket.vName + '_' + this.fa_ket.vName;
+								this.selPool(obj);
 								this.get_nvz_api(this.son_ket.vName + '_' + this.fa_ket.vName);
 							} else {
 								this.$message({
@@ -936,7 +1012,7 @@
 				if (v > max) {
 					this.buy_form.price = max;
 					this.$message({
-						message: '请输入' + min + '-' + max + '以内的价格',
+						message: '请输入' + min + '-' + max + '以内的单价',
 						type: 'error'
 					});
 					return
@@ -944,7 +1020,7 @@
 				if (v < min) {
 					this.buy_form.price = min;
 					this.$message({
-						message: '请输入' + min + '-' + max + '以内的价格',
+						message: '请输入' + min + '-' + max + '以内的单价',
 						type: 'error'
 					});
 					return
@@ -955,6 +1031,25 @@
 						var strarr = str.split('.')[1];
 						if (strarr.length > number) {
 							this.buy_form.price = (v - 0).toFixed(number);
+						}
+					}
+				}
+				if (v - 0) {
+					if (!this.show_price) {
+						if (this.buy_form.price * this.buy_form.number > this.buy_form.money) {
+							this.$message({
+								message: '可用余额不足',
+								type: 'warning'
+							});
+							this.buy_form.price = Math.floor((this.buy_form.money / this.buy_form.number));
+						}
+					} else {
+						if (this.buy_form.price * this.buy_form.number / this.cardinal1_3 > this.buy_form.money) {
+							this.$message({
+								message: '可用余额不足',
+								type: 'warning'
+							});
+							this.buy_form.price = Math.floor((this.buy_form.money / this.buy_form.number));
 						}
 					}
 				}
@@ -986,13 +1081,25 @@
 				//					var x = (v - 0).toFixed(number) ;
 				//					this.buy_form.number = x;
 				//				}
-				if (v * this.buy_form.price > this.buy_form.money) {
-					this.$message({
-						message: '可用余额不足',
-						type: 'error'
-					});
-					this.buy_form.number = (this.buy_form.money / this.buy_form.price).toFixed(number)
-					return
+
+				if (!this.show_price) {
+					if (v * this.buy_form.price * (1 + this.buy_form.cost) > this.buy_form.money) {
+						this.$message({
+							message: '可用余额不足',
+							type: 'error'
+						});
+						this.buy_form.number = Math.floor((this.buy_form.money / this.buy_form.price / (1 + this.buy_form.cost)) * (10 ** number)) / (10 ** number);
+						return
+					}
+				} else {
+					if (v * this.buy_form.price * this.cardinal1_3 * (1 + this.buy_form.cost) > this.buy_form.money) {
+						this.$message({
+							message: '可用余额不足',
+							type: 'error'
+						});
+						this.buy_form.number = Math.floor((this.buy_form.money * this.cardinal1_3 / this.buy_form.price / (1 + this.buy_form.cost)) * (10 ** number)) / (10 ** number);
+						return
+					}
 				}
 			},
 			check_sell_number() {
@@ -1017,13 +1124,14 @@
 						}
 					}
 				}
-				if (v > this.sell_form.money) {
+
+				if (v * (1 + this.sell_form.cost) > this.sell_form.money) {
+					var num = 10 ** this.sixnumber;
 					this.$message({
-						message: '可用数量不足',
+						message: '可用余额不足',
 						type: 'error'
 					});
-					this.sell_form.number = (this.sell_form.money / this.sell_form.price).toFixed(number)
-					return
+					this.sell_form.number = Math.floor(this.sell_form.money / (1 + this.sell_form.cost) * num) / num;
 				}
 			},
 			check_sell_price() {
@@ -1036,11 +1144,10 @@
 				var max = this.sell_form.maxSellPrize;
 				var min = this.sell_form.minSellPrize;
 				var number = this.sixnumber;
-
 				if (v > max) {
 					this.sell_form.price = max;
 					this.$message({
-						message: '请输入' + min + '-' + max + '以内的价格',
+						message: '请输入' + min + '-' + max + '以内的单价',
 						type: 'error'
 					});
 					return
@@ -1048,7 +1155,7 @@
 				if (v < min) {
 					this.sell_form.price = min;
 					this.$message({
-						message: '请输入' + min + '-' + max + '以内的价格',
+						message: '请输入' + min + '-' + max + '以内的单价',
 						type: 'error'
 					});
 					return
@@ -1078,6 +1185,12 @@
 			},
 			/*切换父市场*/
 			check_father(item, index) {
+				this.buy_form.number = '';
+				this.buy_form.silder = 0;
+				this.buy_form.price = '';
+				this.sell_form.number = '';
+				this.sell_form.silder = 0;
+				this.sell_form.price = '';
 				if (item === '我的') {
 					this.father_current = 100;
 					return this.son_market = JSON.parse(JSON.stringify(this.myArr))
@@ -1089,12 +1202,17 @@
 			},
 			/*切换子市场*/
 			check_son(raw, a, column) {
-
+				this.buy_form.number = '';
+				this.buy_form.silder = 0;
+				this.buy_form.price = '';
+				this.sell_form.number = '';
+				this.sell_form.silder = 0;
+				this.sell_form.price = '';
 				if (!column.label) {
 					return
 				}
 				this.son_img = raw.markUrl;
-				this.cardinal1_3 = raw.cardinal1_3 || 1;
+				this.cardinal1_3 = raw.cardinal1_3 / raw.latestPrize || 1;
 				this.new_loading = true;
 				this.sell_data_loading = true;
 				this.buy_data_loading = true;
@@ -1112,9 +1230,14 @@
 				//                this.selAmountMoney(raw)
 			},
 			/*根据币种id查询当前用户钱包:*/
-			findUser(item) {
-				this.buy_loading = true;
-				this.sell_loading = true;
+			findUser(item, flag) {
+				if (!flag) {
+					this.buy_loading = true;
+					this.sell_loading = true;
+				} else {
+					this.buy_loading = false;
+					this.sell_loading = false;
+				}
 				Get({
 					url: 'pool/findUserVirtualCoinNum',
 					data: {
@@ -1148,7 +1271,7 @@
 					}
 				})
 			},
-			/*根据交易市场查询最新交易价格*/
+			/*根据交易市场查询最新交易单价*/
 			findNewPrice(item) {
 				Post({
 					url: 'basisMarket/findNewPrice',
@@ -1167,7 +1290,7 @@
 					}
 				})
 			},
-			/*根据币种名称查询最新交易价格*/
+			/*根据币种名称查询最新交易单价*/
 			findNewPriceBuVirtual(item) {
 				Post({
 					url: 'basisMarket/findNewPriceBuVirtual',
@@ -1261,7 +1384,7 @@
 					}
 				})
 			},
-			/*价格交易限制*/
+			/*单价交易限制*/
 			selCurrencyTraedSum(item) {
 				Get({
 					url: 'pool/findVManage',
@@ -1274,8 +1397,10 @@
 						if (res.code === 0) {
 							this.buy_form.maxBuyPrize = res.data.maxBuyPrize;
 							this.buy_form.minBuyPrize = res.data.minBuyPrize;
+							this.buy_form.cost = res.data.buyCost;
 							this.sell_form.maxSellPrize = res.data.maxSellPrize;
 							this.sell_form.minSellPrize = res.data.minSellPrize;
+							this.sell_form.cost = res.data.sellCost;
 						}
 					},
 					fail: res => {
@@ -1284,16 +1409,21 @@
 				})
 			},
 			/*历史订单*/
-			selPool(item) {
-				this.nowingloading = true;
-				this.historyloading = true;
+			selPool(item, flag) {
+				if (!flag) {
+					this.nowingloading = true;
+					this.historyloading = true;
+				} else {
+					this.nowingloading = false;
+					this.historyloading = false;
+				}
 				Get({
 					url: 'pool/selPool',
 					data: {
 						teadeMarket: item.vName,
 						pageNo: 1,
 						pageSize: 5,
-						lishi: '1'
+						lishi: '2'
 					}, //
 					success: res => {
 						this.nowingloading = false;
@@ -1311,7 +1441,7 @@
 						teadeMarket: item.vName,
 						pageNo: 1,
 						pageSize: 5,
-						lishi: ''
+						lishi: '1'
 					}, //历史
 					success: res => {
 						this.historyloading = false;
@@ -1352,27 +1482,57 @@
 					url: 'pool/findDealState',
 					success: res => {
 						if (res.code === 0) {
+							console.log(res.data)
 							if (res.data === 1) {
+								this.get_deep_data(this.son_ket.vName + '_' + this.fa_ket.vName);
 								this.get_nvz_api(this.son_ket.vName + '_' + this.fa_ket.vName);
 								if (this.son_ket.vName && this.fa_ket.vName) {
 									var obj = {};
 									obj.vName = this.son_ket.vName + '_' + this.fa_ket.vName;
-									this.selPool(obj.vName);
+									this.selPool(obj.vName, true);
+									this.findUser(this.son_ket, true);
+									Get({
+										url: 'basisMarket/selcurrencyManage',
+										data: {
+											bId: this.fa_ket.bId,
+											vName: this.fa_ket.vName,
+										},
+										success: res => {
+											if (res.code === 0) {
+												this.son_market = res.data;
+											}
+										}
+									})
 								}
 							}
 						}
 					}
 				})
 			}, 1000);
+			//			setInterval(res => {
+			//				if (this.son_ket.vName && this.fa_ket.vName) {
+			//					this.findUser(this.son_ket, true);
+			//					var obj = {};
+			//					obj.vName = this.son_ket.vName + '_' + this.fa_ket.vName;
+			//					this.selPool(obj, true);
+			//					Get({
+			//						url: 'basisMarket/selcurrencyManage',
+			//						data: {
+			//							bId: this.fa_ket.bId,
+			//							vName: this.fa_ket.vName,
+			//						},
+			//						success: res => {
+			//							if (res.code === 0) {
+			//								this.son_market = res.data;
+			//							}
+			//						}
+			//					})
+			//				}
+			//			},3000)
 			setInterval(res => {
 				this.get_deep_data(this.son_ket.vName + '_' + this.fa_ket.vName);
 				this.get_nvz_api(this.son_ket.vName + '_' + this.fa_ket.vName);
-				if (this.son_ket.vName && this.fa_ket.vName) {
-					var obj = {};
-					obj.vName = this.son_ket.vName + '_' + this.fa_ket.vName;
-					this.selPool(obj.vName);
-				}
-			}, 5000)
+			}, 6000)
 			this.kline = new Kline({
 				element: "#chart-box-body",
 				width: $('.trading-chart').width(),
@@ -1404,11 +1564,22 @@
 
 <style>
 	@import '../../assets/transaction.css';
+
+
 	.slider-number {
 		position: absolute;
 		top: 12px;
-		right: -20px;
-		font-size: 16px;
+		right: -44px;
+		font-size: 14px;
+	}
+
+	.more_weituo {
+		span {
+			color: #ff9d11;
+			&:hover {
+				text-decoration: underline;
+			}
+		}
 	}
 
 	.section {
@@ -1428,6 +1599,7 @@
 		/*		width: 94%;*/
 	}
 
+	/*
 	.el-slider__runway:before {
 		content: '%';
 		position: absolute;
@@ -1435,6 +1607,7 @@
 		right: -40px;
 		font-size: 20px;
 	}
+*/
 
 	.market .has-gutter {
 		font-size: 12px;
